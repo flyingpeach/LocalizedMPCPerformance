@@ -70,13 +70,24 @@ cost_k
 cost_c_norm  = cost_c / cost_k
 
 %% Plot disturbance response
-distNode = 3;
+distNode = 2;
+
+x0 = zeros(Nx, 1); x0(distNode) = 1;
 
 xs_c = zeros(Nx, Tc);
 us_c = zeros(Nx, Tc);
+xs_k = zeros(Nx, Tc);
+us_k = zeros(Nx, Tc);
+
+K = -(B'*S*B + inputPen*eye(Nu))\(B'*S*A);   
 for k=1:Tc
      xs_c(:,k) = Rc{k}(:,distNode);
      us_c(:,k) = B*Mc{k}(:,distNode);
+     
+     xs_k(:,k) = (A+B*K)^k*x0;
+     us_k(:,k) = B*K*xs_k(:,k);
 end
 
-plot_heat_map(xs_c, us_c, '');
+plot_heat_map(xs_c, us_c, 'Clamped');
+
+plot_heat_map(xs_k, us_k, 'Optimal');
