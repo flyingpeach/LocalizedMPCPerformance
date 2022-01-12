@@ -6,9 +6,12 @@ numPatches = 3;
 alpha      = 0.2; % how much neighbors affect each other
 rho        = 1.2; % stability
 
+% SLS-only params
+T = 80;
+
 % LQR weights
-statePen   = 1;
-inputPen   = 1;
+statePenSqrt = 1;
+inputPenSqrt = 1;
 
 %% Plant setup for chain
 numClamps = numPatches-1; % edges of chain don't need clamps
@@ -32,27 +35,37 @@ for i=1:Nu
 end
 
 %% Synthesize different controllers to compare
-ctrller_naive_clamp; % get Kc, cost_c, Rc, Mc
 ctrller_lqr; % get Kl, cost_l
+ctrller_naive_clamp; % get Kc, cost_c, Rc, Mc
+ctrller_sls; % get cost_s, Rs, Ms
 
 cost_clamp_normalized = cost_c/cost_l
+cost_sls_normalized   = cost_s/cost_l
 
 %% Plot disturbance response
-distNode = 5;
+distNode = 3;
 
-x0   = zeros(Nx, 1);  x0(distNode) = 1;
-xs_c = zeros(Nx, Tc); us_c = zeros(Nx, Tc);
-xs_l = zeros(Nx, Tc); us_l = zeros(Nx, Tc);
+x0 = zeros(Nx, 1);  x0(distNode) = 1;
+T  = min(Ts, Tc);
+xs_c = zeros(Nx, T); us_c = zeros(Nx, T);
+xs_l = zeros(Nx, T); us_l = zeros(Nx, T);
+xs_s = zeros(Nx, T); us_s = zeros(Nx, T);
 
-for k=1:Tc
-     xs_c(:,k) = Rc{k}(:,distNode); us_c(:,k) = B*Mc{k}(:,distNode);
+for k=1:T
      xs_l(:,k) = (A+B*Kl)^(k-1)*x0;     us_l(:,k) = B*Kl*xs_l(:,k);     
+
+     xs_c(:,k) = Rc{k}(:,distNode); us_c(:,k) = B*Mc{k}(:,distNode);
+     xs_s(:,k) = Rs{k}(:,distNode); us_s(:,k) = B*Ms{k}(:,distNode);
+
 end
 
-simcost_l = norm([statePen*xs_l inputPen*us_l], 'fro').^2;
-simcost_c = norm([statePen*xs_c inputPen*us_c], 'fro').^2;
+simcost_l = norm([statePenSqrt*xs_l inputPenSqrt*us_l], 'fro').^2;
+simcost_c = norm([statePenSqrt*xs_c inputPenSqrt*us_c], 'fro').^2;
+simcost_s = norm([statePenSqrt*xs_s inputPenSqrt*us_s], 'fro').^2;
 simcost_c_norm = simcost_c / simcost_l
+simcost_s_norm = simcost_s / simcost_l
 
-plot_heat_map(xs_c, us_c, 'Clamped');
 plot_heat_map(xs_l, us_l, 'Optimal');
+plot_heat_map(xs_c, us_c, 'Clamped');
+plot_heat_map(xs_s, us_s, 'SLS');
 

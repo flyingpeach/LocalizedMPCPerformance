@@ -11,8 +11,8 @@ for i=1:numCtrls
     BLoc     = zeros(2*ctrlRad + 1, 1);
     BLoc(ctrlRad+1) = 1;
     
-    QLoc = statePen*eye(size(ALoc));
-    RLoc = inputPen;
+    QLoc = statePenSqrt^2*eye(size(ALoc));
+    RLoc = inputPenSqrt^2;
     S    = idare(ALoc, BLoc, QLoc, RLoc);
     Kc(numClamps+i, patchIdx) = -(BLoc'*S*BLoc + RLoc)\(BLoc'*S*ALoc);
 end
@@ -24,5 +24,5 @@ Tc       = length(Rc);
 % Cost
 cost_c = 0;
 for k=1:Tc
-    cost_c = cost_c + norm([sqrt(statePen)*Rc{k} sqrt(inputPen)*Mc{k}'], 'fro').^2;
+    cost_c = cost_c + norm([statePenSqrt*Rc{k} inputPenSqrt*Mc{k}'], 'fro').^2;
 end
