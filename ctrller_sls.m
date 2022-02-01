@@ -1,12 +1,10 @@
-%% Custom SLS design
-% Same idea as clamp: do not let disturbances through
-
-% First, determine locality structure
-RSupp = false(Nx, Nx);
-
-clampsExt    = [0 clamps Nx+1]; % "clamps" at end of chain
-lastClamp    = clampsExt(1);
-nextClamp    = clampsExt(2);
+%% Use SLS to find closed-loop map (no comm constraints)
+% Set up closed-loop constraints (for Phix)
+PhixSupp  = false(Nx, Nx);
+PhiuSupp  = true(Nu, Nx);
+clampsExt = [0 clamps Nx+1]; % "clamps" at end of chain
+lastClamp = clampsExt(1);
+nextClamp = clampsExt(2);
 
 for i=1:Nx
     if ismember(i, clamps) 
@@ -14,60 +12,35 @@ for i=1:Nx
         nextClamp    = clampsExt(lastClampIdx+1);        
         
         % A disturbance at the clamp can spread toward the next 2 clamps
-        RSupp(lastClamp+1:nextClamp-1, i) = true;
+        PhixSupp(lastClamp+1:nextClamp-1, i) = true;
 
         lastClamp    = i;
     else
-        RSupp(lastClamp+1:nextClamp-1, i) = true;
+        PhixSupp(lastClamp+1:nextClamp-1, i) = true;
     end
 end
 
-MSupp     = true(Nu, Nx);
-suppSizeR = sum(sum(RSupp));
-suppSizeM = sum(sum(MSupp));
+% Set up parameters for SLS functions
+sys.B2  = B;
+sys.Nu = Nu;
 
-% The following is adapted from state_fdbk_sls.m from the toolbox
-cvx_begin quiet
+sys.Nw  = sys.Nx;
+sys.Nz  = sys.Nu + sys.Nx;
+sys.B1  = eye(sys.Nx); 
+sys.C1  = [statePenSqrt*speye(sys.Nx); sparse(sys.Nu, sys.Nx)];
+sys.D11 = sparse(sys.Nz, sys.Nw);
+sys.D12 = [inputPenSqrt*sparse(sys.Nx, sys.Nu); speye(sys.Nu)];
+sys.sanity_check();
 
-expression R(Nx, Nx, T) 
-expression M(Nu, Nx, T)
+slsParams       = SLSParams();
+slsParams.T_    = Ts;
+slsParams.add_objective(SLSObjective.H2, 1);
 
-% populate decision variables for ease-of-use
-Rs = cell(T, 1); 
-Ms = cell(T, 1);
-for k = 1:T
-    Rs{k} = R(:,:,k); Ms{k} = M(:,:,k); 
-end
+clMaps = state_fdbk_sls_custom_sparsity(sys, slsParams, PhixSupp, PhiuSupp);
 
-variable RMSupps(suppSizeR*T + suppSizeM*T)
-spot = 0;
-for t = 1:T
-    Rs{t}(RSupp) = RMSupps(spot+1:spot+suppSizeR);
-    spot = spot + suppSizeR;
+Rs = clMaps.R_; Ms = clMaps.M_;
 
-    Ms{t}(MSupp) = RMSupps(spot+1:spot+suppSizeM);
-    spot = spot + suppSizeM;
-end
-    
-objective = 0;
-for k=1:T
-    vect = vec([statePenSqrt*Rs{k}; inputPenSqrt*Ms{k}]);
-    objective = objective + vect'*vect;
-end
-
-% achievability constraints
-Rs{1} == eye(Nx);
-Rs{T} == zeros(Nx, Nx);
-for t=1:T-1
-    Rs{t+1} == A*Rs{t} + B*Ms{t};
-end
-
-minimize(objective);
-cvx_end
-
-%% Simulation
-Ts = length(Rs);
- 
+%% Simulation 
 % Cost
 cost_s = 0;
 for k=1:Ts

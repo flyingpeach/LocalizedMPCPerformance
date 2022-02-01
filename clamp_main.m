@@ -7,7 +7,7 @@ alpha      = 0.2; % how much neighbors affect each other
 rho        = 1.2; % stability
 
 % SLS-only params
-T = 80;
+Ts = 80;
 
 % LQR weights
 statePenSqrt = 1;
@@ -68,4 +68,10 @@ simcost_s_norm = simcost_s / simcost_l
 plot_heat_map(xs_l, us_l, 'Optimal');
 plot_heat_map(xs_c, us_c, 'Clamped');
 plot_heat_map(xs_s, us_s, 'SLS');
+
+%% Plot M sparsity
+MSupp = false(Nu, Nx);
+for k=1:Ts
+    MSupp = MSupp | (Ms{k} ~= 0);
+end
 
