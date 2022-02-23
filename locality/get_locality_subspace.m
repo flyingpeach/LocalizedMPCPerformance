@@ -1,20 +1,9 @@
-clear all; close all; clc;
+function [C1, C2, C3] = get_locality_subspace(sys, x0, params)
+% We use tFIR and locality size from params
+% Space of nonlocal trajectories: Image(C1)
+% Space of local trajectories: Images(C1*C3)
+% Space of reachable Y = C1*C2 + C1*C3*[free variable]
 
-%% Setup plant + parameters
-sys    = LTISystem;
-sys.Nx = 10; sys.B1 = eye(sys.Nx);
-alpha = 0.8; rho = 2; actDens = 0.7; 
-generate_dbl_stoch_chain(sys, rho, actDens, alpha);
-
-params = MPCParams();
-params.tFIR_     = 2;
-params.locality_ = 2;
-
-x0 = zeros(sys.Nx, 1);
-x0(randi(sys.Nx)) = 1;
-
-
-%% Algorithm
 Nx   = sys.Nx; Nu = sys.Nu; T = params.tFIR_;
 nPhi = Nx*T + Nu*(T-1);
 
@@ -39,10 +28,6 @@ nonZero       = find(PsiSupp);
 Ed(nonZero,:) = [];
 
 G = -Ed*vec(Z1); 
-F = Ed*Z; Fp = pinv(F); IFF = eye(nPhi*Nx)-Fp*F;
+F = Ed*Z; Fp = pinv(F); 
 
-fullRank  = rank(Z2*X)
-localRank = rank(Z2*X*IFF)
-
-
-
+C1 = Z2*X; C2 = Fp*G; C3 = eye(nPhi*Nx)-Fp*F;
