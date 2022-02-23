@@ -20,9 +20,8 @@ params = MPCParams();
 params.locality_ = locality;
 params.tFIR_     = tFIR;
 
-idxs = randperm(sys.Nx);
-x0   = zeros(sys.Nx, 1);
-x0(idxs(1:numNonzero)) = 1;
+x0 = zeros(sys.Nx, 1);
+x0(randsample(sys.Nx, numNonzero)) = rand(numNonzero, 1);
 w = zeros(sys.Nx, tHorizon); % noiseless
 
 QSqrt = eye(sys.Nx);
