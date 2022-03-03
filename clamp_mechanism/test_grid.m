@@ -3,7 +3,7 @@ clear; clc;
 % User-defined params
 specRad      = 1.5;
 seed         = 421;
-statePenSqrt = 1;
+statePenSqrt = 5;
 inputPenSqrt = 1;
 Ts = 40;
 
@@ -116,11 +116,16 @@ Kl = -(B'*S*B + R)\(B'*S*A);
 %% Use SLS to find closed-loop map (no comm constraints)
 % Set up closed-loop constraints (for Phix)
 PhixSupp  = false(Nx, Nx);
-PhiuSupp  = true(Nu, Nx);
+PhiuSupp  = false(Nu, Nx);
 
 PhixSupp(clamps, :) = true; % Clamps can be affected by both patches
 PhixSupp(patches{1}, [patches{1} 6]) = true;
 PhixSupp(patches{2}, [patches{2} 6]) = true;
+
+% Order: 6, 2, 8, 12, 14
+PhiuSupp(1,:) = true;
+PhiuSupp(2:3, [patches{1} 6]) = true;
+PhiuSupp(4:5, [patches{2} 6]) = true;
 
 % Set up parameters for SLS functions
 sys = LTISystem();
