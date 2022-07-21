@@ -1,4 +1,4 @@
-function [C1, C2, C3] = get_locality_subspace(sys, x0, params)
+function [C1, C2, C3] = get_local_subspace(sys, x0, params)
 % We use tFIR and locality size from params
 % Space of nonlocal trajectories: Image(C1)
 % Space of local trajectories: Images(C1*C3)

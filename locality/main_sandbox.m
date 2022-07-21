@@ -1,26 +1,36 @@
 clear all; clc;
 
-%% User-specified parameters
+%% Chain example
 rho        = 2.0;
-actDens    = 1.0;
-Nx         = 5;
-numNonzero = Nx;
-locality   = 2; % 1 is self-only
-tFIR       = 2;
-eps = 1e-8;
+actDens    = 0.5;
+Nx         = 15;
+tFIR       = 8;
 
-params = MPCParams();
-params.locality_ = locality;
-params.tFIR_     = tFIR;
+paramsChain       = MPCParams();
+paramsChain.tFIR_ = tFIR;
     
-sys = LTISystem(); sys.Nx = Nx; 
-generate_rand_chain(sys, rho, actDens);
-sys.B2 = eye(sys.Nx);
+sysChain = LTISystem(); sysChain.Nx = Nx; 
+generate_rand_chain(sysChain, rho, actDens);
 
-x0 = zeros(sys.Nx, 1);
-x0(randsample(sys.Nx, numNonzero)) = rand(numNonzero, 1);
-    
-[C1, C2, C3] = get_locality_subspace(sys, x0, params);
-% C1 = Z2*X, C3 = (I - Fp*F)
+localityChain = get_ideal_locality(sysChain, paramsChain)
 
-rankRatios = rank(C1*C3, eps) / rank(C1, eps)
+%% Grid example
+seed          = 420;
+gridSize      = 4;
+tFIR          = 5;
+connectThresh = 0.65;
+actDens       = 0.6;
+Ts            = 0.2;
+
+paramsGrid       = MPCParams();
+paramsGrid.tFIR_ = tFIR;
+
+numNodes      = gridSize * gridSize; 
+numActs       = round(actDens*numNodes);
+actuatedNodes = randsample(numNodes, numActs);
+[adjMtx, nodeCoords, susceptMtx, inertiasInv, dampings] = generate_grid_topology(gridSize, connectThresh, seed);
+sysGrid = generate_grid_plant(actuatedNodes, adjMtx, susceptMtx, inertiasInv, dampings, Ts);
+
+localityGrid = get_ideal_locality(sysGrid, paramsGrid)
+
+plot_graph(adjMtx, nodeCoords, 'k')
