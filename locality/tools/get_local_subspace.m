@@ -1,9 +1,6 @@
-function [C1, C2, C3] = get_local_subspace(sys, x0, params)
+function mtx = get_local_subspace(sys, x0, params)
 % We use tFIR and locality size from params
-% Space of nonlocal trajectories: Image(C1)
-% Space of local trajectories: Images(C1*C3)
-% Space of reachable Y = C1*C2 + C1*C3*[free variable]
-
+% Space of local trajectories is proportional to the size of Image(mtx)
 Nx   = sys.Nx; Nu = sys.Nu; T = params.tFIR_;
 nPhi = Nx*T + Nu*(T-1);
 
@@ -23,11 +20,10 @@ for i=1:Nx
     X = [X x0(i)*eye(nPhi)];
 end
 
-Ed            = eye((nPhi-Nx)*Nx);
+Ed            = speye((nPhi-Nx)*Nx);
 nonZero       = find(PsiSupp);
 Ed(nonZero,:) = [];
+F             = sparse(Ed*Z);
 
-G = -Ed*vec(Z1); 
-F = Ed*Z; Fp = pinv(F); 
-
-C1 = Z2*X; C2 = Fp*G; C3 = eye(nPhi*Nx)-Fp*F;
+mtx1 = F\F; % this will give rank deficiency warnings; it's ok
+mtx  = Z2*X*(eye(nPhi*Nx)-mtx1);
