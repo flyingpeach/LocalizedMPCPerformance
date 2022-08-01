@@ -1,6 +1,8 @@
-function mtx = get_local_subspace(sys, x0, params)
+function mtx = get_local_subspace(sys, x0, params, adjustLocality)
 % We use tFIR and locality size from params
 % Space of local trajectories is proportional to the size of Image(mtx)
+% adjustLocality: adjust definition of locality to work with grid example
+
 Nx   = sys.Nx; Nu = sys.Nu; T = params.tFIR_;
 nPhi = Nx*T + Nu*(T-1);
 
@@ -11,7 +13,11 @@ ZABp = pinv(ZAB);
 Z1 = ZABp*IO;              Z1 = Z1(Nx+1:end, :);
 Z2 = eye(nPhi) - ZABp*ZAB; Z2 = Z2(Nx+1:end, :);
 
-PsiSupp = get_sparsity_psi(sys, params);
+if adjustLocality
+    PsiSupp = get_sparsity_psi(sys, params, adjustLocality);
+else
+    PsiSupp = get_sparsity_psi(sys, params);
+end
 PsiSupp = PsiSupp(Nx+1:end, 1:Nx);
 
 Z = []; X = [];

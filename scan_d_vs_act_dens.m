@@ -1,12 +1,13 @@
 clear all; clc;
 
 %% User-specified parameters
-numSimsPerPt  = 5;
-tFIR          = 10;
-gridSize      = 4;
-actDensities  = [0.9, 0.8, 0.7, 0.5];
-connectThresh = 0.65; % To make sure grid is connected 
-Ts            = 0.2;
+numSimsPerPt   = 5;
+tFIR           = 10;
+gridSize       = 4;
+actDensities   = [0.9, 0.7, 0.5, 0.3];
+connectThresh  = 0.65; % To make sure grid is connected 
+Ts             = 0.2;
+adjustLocality = true;
 
 seeds = [726, 730, 731, 732, 733];
 % 727-729 are ommitted as they produce a non-connected topology
@@ -45,7 +46,7 @@ for i=1:numActDens
     fprintf('Simulating actuation density size %d of %d\n', i, numActDens);
     for j=1:numSimsPerPt
         fprintf('\tSim %d of %d\n', j, numSimsPerPt);
-        locSizes(i,j) = get_ideal_locality(systems{i,j}, params);
+        locSizes(i,j) = get_ideal_locality(systems{i,j}, params, adjustLocality);
     end
 end
 

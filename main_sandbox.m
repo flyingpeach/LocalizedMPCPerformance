@@ -1,19 +1,5 @@
 clear all; clc;
 
-%% Chain example
-rho        = 2.0;
-actDens    = 0.5;
-Nx         = 15;
-tFIR       = 8;
-
-paramsChain       = MPCParams();
-paramsChain.tFIR_ = tFIR;
-    
-sysChain = LTISystem(); sysChain.Nx = Nx; 
-generate_rand_chain(sysChain, rho, actDens);
-
-localityChain = get_ideal_locality(sysChain, paramsChain)
-
 %% Grid example
 seed          = 420;
 gridSize      = 4;
@@ -31,6 +17,7 @@ actuatedNodes = randsample(numNodes, numActs);
 [adjMtx, nodeCoords, susceptMtx, inertiasInv, dampings] = generate_grid_topology(gridSize, connectThresh, seed);
 sysGrid = generate_grid_plant(actuatedNodes, adjMtx, susceptMtx, inertiasInv, dampings, Ts);
 
-localityGrid = get_ideal_locality(sysGrid, paramsGrid)
+adjustLocality = true;
+localityGrid   = get_ideal_locality(sysGrid, paramsGrid, adjustLocality)
 
 plot_graph(adjMtx, nodeCoords, 'k')

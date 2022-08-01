@@ -7,8 +7,9 @@ gridSize      = 4;
 specRads      = [1.0, 1.5, 2.0, 4.0];
 actDens       = 1.0;  % Translates to 50% actuation on nodes, 
                       % since only freq is actuated
-connectThresh = 0.65; % To make sure grid is connected 
-Ts            = 0.2;
+connectThresh  = 0.65; % To make sure grid is connected 
+Ts             = 0.2;
+adjustLocality = true;
 
 seeds = [726, 730, 731, 732, 733];
 % 727-729 are ommitted as they produce a non-connected topology
@@ -50,6 +51,6 @@ for i=1:numSpecRads
         specRadOriginal = max(abs(eig(sys.A)));
         sys.A           = sys.A / specRadOriginal * specRads(i);
         
-        locSizes(i,j) = get_ideal_locality(sys, params);
+        locSizes(i,j) = get_ideal_locality(sys, params, adjustLocality);
     end
 end
