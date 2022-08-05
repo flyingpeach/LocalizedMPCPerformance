@@ -2,10 +2,10 @@ clear all; clc;
 
 %% Grid example
 seed          = 420;
-gridSize      = 4;
-tFIR          = 5;
+gridSize      = 5;
+tFIR          = 10;
 connectThresh = 0.65;
-actDens       = 0.6;
+actDens       = 1.0;
 Ts            = 0.2;
 
 paramsGrid       = MPCParams();
@@ -20,4 +20,4 @@ sysGrid = generate_grid_plant(actuatedNodes, adjMtx, susceptMtx, inertiasInv, da
 adjustLocality = true;
 localityGrid   = get_ideal_locality(sysGrid, paramsGrid, adjustLocality)
 
-plot_graph(adjMtx, nodeCoords, 'k')
+%plot_graph(adjMtx, nodeCoords, 'k')

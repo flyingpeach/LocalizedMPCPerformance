@@ -7,11 +7,14 @@ Nx   = sys.Nx; Nu = sys.Nu; T = params.tFIR_;
 nPhi = Nx*T + Nu*(T-1);
 
 ZAB  = get_constraint_zab(sys, T);
-IO   = [eye(Nx); zeros(Nx*(T-1), Nx)];
-ZABp = pinv(ZAB);
 
-Z1 = ZABp*IO;              Z1 = Z1(Nx+1:end, :);
-Z2 = eye(nPhi) - ZABp*ZAB; Z2 = Z2(Nx+1:end, :);
+% Unneeded calculations for rank comparison; needed for subspace vector
+% IO = [eye(Nx); zeros(Nx*(T-1), Nx)];
+% Zp = ZAB\IO;              
+% Zp = Zp(Nx+1:end, :);
+
+Zh = speye(nPhi) - ZAB\ZAB; 
+Zh = sparse(Zh(Nx+1:end, :));
 
 if adjustLocality
     PsiSupp = get_sparsity_psi(sys, params, adjustLocality);
@@ -20,16 +23,25 @@ else
 end
 PsiSupp = PsiSupp(Nx+1:end, 1:Nx);
 
-Z = []; X = [];
+nz   = nPhi - Nx;
+Zblk = sparse(nz*Nx, nPhi*Nx);
 for i=1:Nx
-    Z = blkdiag(Z, Z2);
-    X = [X x0(i)*eye(nPhi)];
+    Zblk((i-1)*nz+1:i*nz,(i-1)*nPhi+1:i*nPhi) = Zh;
 end
 
-Ed            = speye((nPhi-Nx)*Nx);
-nonZero       = find(PsiSupp);
-Ed(nonZero,:) = [];
-F             = sparse(Ed*Z);
+% This takes too much memory
+% Zblk = kron(speye(Nx), Zh); % Block diagonal matrix of Nx blocks 
 
-mtx1 = F\F; % this will give rank deficiency warnings; it's ok
-mtx  = Z2*X*(eye(nPhi*Nx)-mtx1);
+ZblkDensity = nnz(Zblk)/size(Zblk,1)/size(Zblk,2)
+
+X = sparse(nPhi, Nx*nPhi);
+for i=1:Nx
+    idxEnd   = nPhi*i;
+    idxStart = idxEnd - nPhi + 1;    
+    X(:, idxStart:idxEnd) =  x0(i)*speye(nPhi);
+end
+
+zeroIdx = find(~PsiSupp);
+F       = Zblk(zeroIdx,:);
+mtx1    = F\F; % this will give rank deficiency warnings; it's ok
+mtx     = Zh*X*(speye(nPhi*Nx)-mtx1);
