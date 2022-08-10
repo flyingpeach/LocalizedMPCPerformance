@@ -21,4 +21,5 @@ sysGrid = generate_grid_plant(actuatedNodes, adjMtx, susceptMtx, inertiasInv, da
 adjustLocality = true;
 localityGrid   = get_ideal_locality(sysGrid, paramsGrid, adjustLocality)
 
+datetime('now')
 %plot_graph(adjMtx, nodeCoords, 'k')
