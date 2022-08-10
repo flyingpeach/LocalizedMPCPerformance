@@ -16,6 +16,9 @@ ZAB  = get_constraint_zab(sys, T);
 Zh = speye(nPhi) - ZAB\ZAB; 
 Zh = sparse(Zh(Nx+1:end, :));
 
+EPS = 1e-8;
+Zh(abs(Zh) < EPS) = 0; 
+
 if adjustLocality
     PsiSupp = get_sparsity_psi(sys, params, adjustLocality);
 else
