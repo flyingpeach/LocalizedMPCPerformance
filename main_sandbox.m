@@ -1,9 +1,10 @@
 clear all; clc;
+warning off
 
 %% Grid example
 seed          = 420;
 gridSize      = 5;
-tFIR          = 10;
+tFIR          = 5;
 connectThresh = 0.65;
 actDens       = 1.0;
 Ts            = 0.2;

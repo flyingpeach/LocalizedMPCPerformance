@@ -22,26 +22,22 @@ else
     PsiSupp = get_sparsity_psi(sys, params);
 end
 PsiSupp = PsiSupp(Nx+1:end, 1:Nx);
+zeroIdx = find(~PsiSupp);
+nz      = nPhi - Nx;
 
-nz   = nPhi - Nx;
-Zblk = sparse(nz*Nx, nPhi*Nx);
+FFs = cell(Nx, 1); % Carries blocks of F\F
 for i=1:Nx
-    Zblk((i-1)*nz+1:i*nz,(i-1)*nPhi+1:i*nPhi) = Zh;
+    startIdx = (i-1)*nz+1;
+    endIdx   = i*nz;    
+    zeroHere = zeroIdx(zeroIdx >= startIdx & zeroIdx <= endIdx) - (i-1)*nz;
+    FFs{i}   = Zh(zeroHere,:)\Zh(zeroHere,:);
 end
 
-% This takes too much memory
-% Zblk = kron(speye(Nx), Zh); % Block diagonal matrix of Nx blocks 
-
-ZblkDensity = nnz(Zblk)/size(Zblk,1)/size(Zblk,2)
-
-X = sparse(nPhi, Nx*nPhi);
+XFF = sparse(nPhi, Nx*nPhi); % X*(I-F\F)
 for i=1:Nx
     idxEnd   = nPhi*i;
-    idxStart = idxEnd - nPhi + 1;    
-    X(:, idxStart:idxEnd) =  x0(i)*speye(nPhi);
+    idxStart = idxEnd - nPhi + 1;
+    XFF(:, idxStart:idxEnd) = x0(i)*(speye(nPhi) - FFs{i});
 end
 
-zeroIdx = find(~PsiSupp);
-F       = Zblk(zeroIdx,:);
-mtx1    = F\F; % this will give rank deficiency warnings; it's ok
-mtx     = Zh*X*(speye(nPhi*Nx)-mtx1);
+mtx     = Zh*XFF;
