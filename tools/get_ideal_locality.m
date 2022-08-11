@@ -10,7 +10,12 @@ function locality = get_ideal_locality(sys, params, adjustLocality)
 % Values of x0 need to be nonzero; specific value doesn't matter
 x0 = ones(sys.Nx, 1);
 
-for locality=2:sys.Nx
+maxLoc = sys.Nx;
+if adjustLocality
+    maxLoc = sys.Nx/2; % Grid; two states per node
+end
+
+for locality=2:maxLoc
     fprintf('Checking locality size %d\n', locality);
     params.locality_ = locality;
     rankRatio        = get_rank_ratio(sys, x0, params, adjustLocality);

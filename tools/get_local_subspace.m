@@ -28,13 +28,14 @@ PsiSupp = PsiSupp(Nx+1:end, 1:Nx);
 zeroIdx = find(~PsiSupp);
 nz      = nPhi - Nx;
 
-FFs = cell(Nx, 1); % Carries blocks of F\F
-fprintf('Calculating Fp*F\n');
+IFFs = cell(Nx, 1); % Carries blocks of I - F\F
+fprintf('Calculating I - Fp*F\n');
 for i=1:Nx
     startIdx = (i-1)*nz+1;
     endIdx   = i*nz;    
     zeroHere = zeroIdx(zeroIdx >= startIdx & zeroIdx <= endIdx) - (i-1)*nz;
-    FFs{i}   = Zh(zeroHere,:)\Zh(zeroHere,:);
+    IFFs{i}   = speye(nPhi) - Zh(zeroHere,:)\Zh(zeroHere,:);
+    IFFs{i}(abs(IFFs{i}) < EPS) = 0;
 end
 
 fprintf('Calculating X*(I-Fp*F)\n');
@@ -42,7 +43,7 @@ XFF = sparse(nPhi, Nx*nPhi); % X*(I-F\F)
 for i=1:Nx
     idxEnd   = nPhi*i;
     idxStart = idxEnd - nPhi + 1;
-    XFF(:, idxStart:idxEnd) = x0(i)*(speye(nPhi) - FFs{i});
+    XFF(:, idxStart:idxEnd) = x0(i)*IFFs{i};
 end
 
 fprintf('Calculating entire matrix\n');
