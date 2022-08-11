@@ -54,3 +54,13 @@ for i=1:numSpecRads
         locSizes(i,j) = get_ideal_locality(sys, params, adjustLocality);
     end
 end
+
+%% Plots
+% Remember that our "locality" is actually different from paper
+% paper: d=0 means only self communication
+% us   : d=1 means only self communication
+
+figure();
+plot(specRads, mean(locSizes,2) - 1);
+xlabel('Spectral radius');
+ylabel('Minimum locality size');

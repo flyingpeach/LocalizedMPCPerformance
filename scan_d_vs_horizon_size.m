@@ -48,3 +48,13 @@ for i=1:numHorizonSizes
         locSizes(i,j) = get_ideal_locality(systems{j}, params, adjustLocality);
     end
 end
+
+%% Plots
+% Remember that our "locality" is actually different from paper
+% paper: d=0 means only self communication
+% us   : d=1 means only self communication
+
+figure();
+plot(tFIRs, mean(locSizes,2) - 1);
+xlabel('Horizon lengths');
+ylabel('Minimum locality size');
