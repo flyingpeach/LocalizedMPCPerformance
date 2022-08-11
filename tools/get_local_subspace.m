@@ -48,3 +48,14 @@ end
 
 fprintf('Calculating entire matrix\n');
 mtx     = Zh*XFF;
+
+% Implementing sparse zero-column finder because matlab doesn't do it
+zeroCols = false(size(mtx,2), 1);
+for i=1:size(mtx,2)
+    if isempty(find(mtx(:,i), 1))
+        zeroCols(i) = true;
+    end
+end
+mtx(:,zeroCols) = [];
+
+
