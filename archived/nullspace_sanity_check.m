@@ -1,9 +1,9 @@
 % Sanity check for nullspace formulation of vectorized Phi
-% We solve a per-iteration MPC problem in two ways: standard formulation,
-% and nullspace formulation. The results should be identical.
+% We solve a per-iteration MPC problem in 3 ways: standard formulation,
+% and nullspace formulation (2 methods). The results should be identical.
 clear; clc;
 
-%% User-tuned params
+%% Setup
 sys    = LTISystem();
 sys.Nx = 10; sys.B1 = eye(sys.Nx);
 alpha = 0.8; rho = 1.5; actDens = 0.7; 
@@ -14,7 +14,6 @@ locality   = 3; % 1 is self-only
 tFIR       = 4;
 tHorizon   = 20;
 
-%% Setup
 params = MPCParams();
 params.locality_ = locality;
 params.tFIR_     = tFIR;
@@ -23,8 +22,8 @@ idxs = randperm(sys.Nx);
 x0   = zeros(sys.Nx, 1);
 x0(idxs(1:numNonzero)) = 10;
 
-params.QSqrt_ = eye(sys.Nx);
-params.RSqrt_ = eye(sys.Nu);
+params.QSqrt_ = diag(rand(sys.Nx, 1));
+params.RSqrt_ = diag(rand(sys.Nu, 1));
 
 %% Standard formulation using matrix, x0 [Adapted from mpc_centralized]
 Nx = sys.Nx; Nu = sys.Nu; T = params.tFIR_;
@@ -66,9 +65,11 @@ ZAB*Psi == IO; % dynamics constraints
 minimize(obj1)
 cvx_end
 
+obj1 % Check if infeasible
 traj1 = Psi*x0;
 
 %% Nullspace formulation (first version)
+% Note: this is super slow for large systems
 Zp = ZAB\IO;
 Zp = Zp(Nx+1:end, :);
 Zh = eye(nPhi) - ZAB\ZAB;
@@ -109,6 +110,9 @@ end
 minimize(obj2)
 cvx_end
 
+trajDiff1 = norm(traj1 - traj2) / norm(traj1)
+objDiff1  = norm(obj1 - obj2) / norm(obj1)
+
 %% Nullspace formulation (second version)
 suppIdx = find(PsiSupp);
 numSupp = length(suppIdx);
@@ -146,10 +150,6 @@ end
 
 minimize(obj3)
 cvx_end
-
-%% These should be very small
-trajDiff1 = norm(traj1 - traj2) / norm(traj1)
-objDiff1  = norm(obj1 - obj2) / norm(obj1)
 
 trajDiff2 = norm(traj1 - traj3) / norm(traj1)
 objDiff2  = norm(obj1 - obj3) / norm(obj1)
