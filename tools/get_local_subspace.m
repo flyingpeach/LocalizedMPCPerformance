@@ -3,6 +3,9 @@ function mtx = get_local_subspace(sys, x0, params, adjustLocality)
 % Space of local trajectories is proportional to the size of Image(mtx)
 % adjustLocality: adjust definition of locality to work with grid example
 
+% Hard-coded
+EPS = 1e-8;
+
 Nx   = sys.Nx; Nu = sys.Nu; T = params.tFIR_;
 nPhi = Nx*T + Nu*(T-1);
 ZAB  = sparse(get_constraint_zab(sys, T));
@@ -28,21 +31,26 @@ end
 X = X(Nx+1:end, suppIdx);
 
 H = H(:, suppIdx);
-
-
 IO = [eye(Nx); zeros(Nx*(T-1), Nx)];
-h = vec(IO);
+h  = vec(IO);
 % Check if there is even a solution!
-EPS = 1e-8;
 test = H\h;
 if norm(H*test - h, 'fro') > EPS % no solution exists
     mtx = 0;
     return; 
 end
 
-
 mtx1 = speye(length(suppIdx)) - H\H;
 mtx  = X * mtx1;
+
+% Implementing sparse zero-column finder because matlab doesn't do it
+zeroCols = false(size(mtx,2), 1);
+for i=1:size(mtx,2)
+    if isempty(find(mtx(:,i), 1))
+        zeroCols(i) = true;
+    end
+end
+mtx(:,zeroCols) = [];
 
 % Zh = speye(nPhi) - ZAB\ZAB; 
 % Zh = sparse(Zh(Nx+1:end, :));
@@ -69,17 +77,3 @@ mtx  = X * mtx1;
 %     idxStart = idxEnd - nPhi + 1;
 %     XFF(:, idxStart:idxEnd) = x0(i)*IFFs{i};
 % end
-% 
-% fprintf('Calculating entire matrix\n');
-% mtx     = Zh*XFF;
-% 
-% % Implementing sparse zero-column finder because matlab doesn't do it
-% zeroCols = false(size(mtx,2), 1);
-% for i=1:size(mtx,2)
-%     if isempty(find(mtx(:,i), 1))
-%         zeroCols(i) = true;
-%     end
-% end
-% mtx(:,zeroCols) = [];
-% 
-% 
