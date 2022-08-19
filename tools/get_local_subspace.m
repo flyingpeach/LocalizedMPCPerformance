@@ -9,71 +9,43 @@ EPS = 1e-8;
 Nx   = sys.Nx; Nu = sys.Nu; T = params.tFIR_;
 nPhi = Nx*T + Nu*(T-1);
 ZAB  = sparse(get_constraint_zab(sys, T));
+IO   = [eye(Nx); zeros(Nx*(T-1), Nx)];
+h    = vec(IO);
 
 if adjustLocality
     PsiSupp = get_sparsity_psi(sys, params, adjustLocality);
 else
     PsiSupp = get_sparsity_psi(sys, params);
 end
-PsiSupp = PsiSupp(:, 1:Nx);
-suppIdx = find(PsiSupp);
+PsiSupp  = PsiSupp(:, 1:Nx);
+suppIdx  = find(PsiSupp);
+suppSize = length(suppIdx);
 
-% TODO: there is a faster way to construct these
-H = []; 
+mtx = [];
 for i=1:Nx
-    H = blkdiag(H, ZAB);
-end
-
-X = [];
-for i=1:Nx
-    X = [X x0(i)*speye(nPhi)];
-end
-X = X(Nx+1:end, suppIdx);
-
-H = H(:, suppIdx);
-IO = [eye(Nx); zeros(Nx*(T-1), Nx)];
-h  = vec(IO);
-% Check if there is even a solution!
-test = H\h;
-if norm(H*test - h, 'fro') > EPS % no solution exists
-    mtx = 0;
-    return; 
-end
-
-mtx1 = speye(length(suppIdx)) - H\H;
-mtx  = X * mtx1;
-
-% Implementing sparse zero-column finder because matlab doesn't do it
-zeroCols = false(size(mtx,2), 1);
-for i=1:size(mtx,2)
-    if isempty(find(mtx(:,i), 1))
-        zeroCols(i) = true;
+    idxStart = (i-1)*nPhi+1;
+    idxEnd   = i*nPhi;
+    myIdx    = suppIdx(suppIdx >= idxStart & suppIdx <= idxEnd) - (i-1)*nPhi;
+    nCols    = length(myIdx);
+    
+    % Check if there is a solution
+    Hi       = ZAB(:,myIdx);
+    hi       = h((i-1)*Nx*T+1:i*Nx*T);
+    testSol  = Hi\hi;
+    if norm(Hi*testSol - hi, 'fro') > EPS % No solution exists
+        mtx = 0;
+        return;
     end
+    
+    IHHi     = speye(nCols) - Hi\Hi;
+    zeroCols = false(nCols,1); % Get rid of zero columns
+    for j=1:nCols
+        if isempty(find(IHHi(:,j),1))
+            zeroCols(j) = true;
+        end
+    end
+    IHHi(:,zeroCols) = [];
+    
+    xi  = x0(i)*speye(nPhi); 
+    mtx = [mtx xi(Nx+1:end,myIdx)*IHHi];
 end
-mtx(:,zeroCols) = [];
-
-% Zh = speye(nPhi) - ZAB\ZAB; 
-% Zh = sparse(Zh(Nx+1:end, :));
-% 
-% EPS = 1e-8;
-% Zh(abs(Zh) < EPS) = 0; 
-% 
-% nz      = nPhi - Nx;
-% 
-% IFFs = cell(Nx, 1); % Carries blocks of I - F\F
-% fprintf('Calculating I - Fp*F\n');
-% for i=1:Nx
-%     startIdx = (i-1)*nz+1;
-%     endIdx   = i*nz;    
-%     zeroHere = zeroIdx(zeroIdx >= startIdx & zeroIdx <= endIdx) - (i-1)*nz;
-%     IFFs{i}   = speye(nPhi) - Zh(zeroHere,:)\Zh(zeroHere,:);
-%     IFFs{i}(abs(IFFs{i}) < EPS) = 0;
-% end
-% 
-% fprintf('Calculating X*(I-Fp*F)\n');
-% XFF = sparse(nPhi, Nx*nPhi); % X*(I-F\F)
-% for i=1:Nx
-%     idxEnd   = nPhi*i;
-%     idxStart = idxEnd - nPhi + 1;
-%     XFF(:, idxStart:idxEnd) = x0(i)*IFFs{i};
-% end
