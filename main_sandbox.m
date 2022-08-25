@@ -2,11 +2,11 @@ clear all; clc;
 warning off
 
 %% Grid example
-seed          = 420;
-gridSize      = 5;
+seed          = 400;
+gridSize      = 11;
 tFIR          = 10;
 connectThresh = 0.65;
-actDens       = 0.8;
+actDens       = 1.0;
 Ts            = 0.2;
 
 params       = MPCParams();
@@ -25,7 +25,7 @@ adjustLocality = true;
 locality = get_ideal_locality(sys, params, adjustLocality)
 
 %% Setup for control problem
-x0     = rand(sys.Nx, 1);
+x0 = rand(sys.Nx, 1);
 
 params.locality_ = locality;
 params.QSqrt_    = diag(rand(sys.Nx, 1));
@@ -42,23 +42,21 @@ ZAB   = get_constraint_zab(sys, T);
 fprintf('Calculating global trajectory\n');
 
 cvx_begin quiet
-variable Psi1(nPhi, Nx)
+variable xs(Nx, T)
+variable us(Nu, T-1)
 
-% Set up objective function
-obj1 = 0;
-for k = 1:T
-    kx         = get_range(k, Nx); % rows of Psi representing Psix
-    vect       = QSqrt*Psi1(kx, 1:Nx)*x0;
-    obj1 = obj1 + vect'*vect;
+xs(:,1) == x0; % Initial condition
+obj1    = 0; % Objective function
+for t = 1:T-1
+    obj1 = obj1 + xs(:,t)'*QSqrt*QSqrt*xs(:,t) ...
+                + us(:,t)'*RSqrt*RSqrt*us(:,t);
+            
+    % Dynamics
+    xs(:,t+1) == sys.A*xs(:,t) + sys.B2*us(:,t);
+            
 end
-for k = 1:T-1
-    ku         = Nx*T + get_range(k, Nu); % rows of Psi representing Psiu
-    vect       = RSqrt*Psi1(ku, 1:Nx)*x0;
-    obj1 = obj1 + vect'*vect;
-end
+obj1 = obj1 + + xs(:,T)'*QSqrt*QSqrt*xs(:,T); % Terminal cost
 
-% Constraints
-ZAB*Psi1 == IO; % dynamics constraints
 minimize(obj1)
 cvx_end
 
@@ -70,27 +68,27 @@ PsiSupp = PsiSupp(:, 1:Nx);
 suppSizePsi = sum(sum(PsiSupp));
 
 cvx_begin quiet
-expression Psi2(nPhi, Nx)
+expression Psi(nPhi, Nx)
 variable PsiSuppVals(suppSizePsi, 1)
-Psi2(PsiSupp) = PsiSuppVals; 
+Psi(PsiSupp) = PsiSuppVals; 
 
 % Set up objective function
 obj2 = 0;
 for k = 1:T
     kx         = get_range(k, Nx); % rows of Psi representing Psix
-    vect       = QSqrt*Psi2(kx, 1:Nx)*x0;
+    vect       = QSqrt*Psi(kx, 1:Nx)*x0;
     obj2 = obj2 + vect'*vect;
 end
 for k = 1:T-1
     ku         = Nx*T + get_range(k, Nu); % rows of Psi representing Psiu
-    vect       = RSqrt*Psi2(ku, 1:Nx)*x0;
+    vect       = RSqrt*Psi(ku, 1:Nx)*x0;
     obj2 = obj2 + vect'*vect;
 end
 
 % Constraints
-ZAB*Psi2 == IO; % dynamics constraints
+ZAB*Psi == IO; % dynamics constraints
 minimize(obj2)
 cvx_end
 
-objDiff  = norm(obj2 - obj1) / obj2
-trajDiff = norm(Psi2*x0 - Psi1*x0) / norm(Psi1*x0)
+objDiff  = norm(obj2 - obj1) / obj1
+trajDiff = norm([vec(xs); vec(us)] - Psi*x0) / norm(xs)
