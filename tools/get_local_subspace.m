@@ -1,10 +1,8 @@
-function mtx = get_local_subspace(sys, x0, params, adjustLocality)
+function mtx = get_local_subspace(sys, x0, params, adjustLocality, eps)
 % We use tFIR and locality size from params
 % Space of local trajectories is proportional to the size of Image(mtx)
 % adjustLocality: adjust definition of locality to work with grid example
-
-% Hard-coded
-EPS = 1e-8;
+% eps           : how to determine whether solution exists
 
 Nx   = sys.Nx; Nu = sys.Nu; T = params.tFIR_;
 nPhi = Nx*T + Nu*(T-1);
@@ -32,7 +30,10 @@ for i=1:Nx
     Hi       = ZAB(:,myIdx);
     hi       = h((i-1)*Nx*T+1:i*Nx*T);
     testSol  = Hi\hi;
-    if norm(Hi*testSol - hi, 'fro') > EPS % No solution exists
+    
+    % Note: using max instead of 2-norm to make this check less
+    %       dimension-dependent
+    if max(abs(Hi*testSol - hi)) > eps % No solution exists
         mtx = 0;
         return;
     end
