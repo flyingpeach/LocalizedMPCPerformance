@@ -1,16 +1,17 @@
 clear all; clc;
+warning off;
 
 %% User-specified parameters
 numSimsPerPt   = 5;
-tFIR           = 10;
-gridSize       = 4;
-actDensities   = [0.9, 0.7, 0.5, 0.3];
-connectThresh  = 0.65; % To make sure grid is connected 
+tFIR           = 15;
+gridSize       = 5;
+actDensities   = [1.0, 0.8, 0.6, 0.4, 0.2];
+connectThresh  = 0.65;
 Ts             = 0.2;
 adjustLocality = true;
 
-seeds = [726, 730, 731, 732, 733];
-% 727-729 are ommitted as they produce a non-connected topology
+% Need to pick seeds such that grid is fully connected
+seeds = [700, 703, 704, 705, 706]; % for gridSize = 5
 
 plotTopology = false;
 

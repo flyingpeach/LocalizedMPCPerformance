@@ -1,18 +1,17 @@
 clear all; clc;
+warning off;
 
 %% User-specified parameters
-numSimsPerPt  = 5;
-tFIRs         = [4, 8, 12, 16];
-gridSize      = 4;
-actDens       = 1.0;  % Translates to 50% actuation on nodes, 
-                      % since only freq is actuated
-connectThresh  = 0.65; % To make sure grid is connected 
+numSimsPerPt   = 5;
+tFIRs          = [5, 10, 15, 20, 25, 30];
+gridSize       = 5;
+actDens        = 1.0; % and 0.8
+connectThresh  = 0.65;
 Ts             = 0.2;
 adjustLocality = true;
 
-seeds = [726, 730, 731, 732, 733];
-% 727-729 are ommitted as they produce a non-connected topology
-
+% Need to pick seeds such that grid is fully connected
+seeds = [700, 703, 704, 705, 706]; % for gridSize = 5
 plotTopology = false;
 
 %% Generate and visualize plants
