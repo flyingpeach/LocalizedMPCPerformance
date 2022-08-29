@@ -1,12 +1,12 @@
 clear all; clc;
-warning off
+warning off;
 
 %% Grid example
-seed          = 400;
-gridSize      = 11;
-tFIR          = 10;
-connectThresh = 0.65;
-actDens       = 1.0;
+seed          = 712;
+gridSize      = 5;
+tFIR          = 15;
+connectThresh = 0.6;
+actDens       = 0.6;
 Ts            = 0.2;
 
 params       = MPCParams();
@@ -14,15 +14,16 @@ params.tFIR_ = tFIR;
 
 numNodes      = gridSize * gridSize; 
 numActs       = round(actDens*numNodes);
-actuatedNodes = randsample(numNodes, numActs);
+rng(seed); % For actuated nodes
 [adjMtx, nodeCoords, susceptMtx, inertiasInv, dampings] = generate_grid_topology(gridSize, connectThresh, seed);
+actuatedNodes = randsample(numNodes, numActs);
 sys = generate_grid_plant(actuatedNodes, adjMtx, susceptMtx, inertiasInv, dampings, Ts);
 
 adjustLocality = true;
 %plot_graph(adjMtx, nodeCoords, 'k')
 
 %% Get locality
-locality = get_ideal_locality(sys, params, adjustLocality)
+locality = get_ideal_locality(sys, params, adjustLocality);
 
 %% Setup for control problem
 x0 = rand(sys.Nx, 1);
