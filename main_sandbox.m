@@ -2,8 +2,8 @@ clear all; clc;
 warning off;
 
 %% Grid example
-seed          = 712;
-gridSize      = 5;
+seed          = 706;
+gridSize      = 7;
 tFIR          = 15;
 connectThresh = 0.6;
 actDens       = 0.6;
@@ -20,7 +20,13 @@ actuatedNodes = randsample(numNodes, numActs);
 sys = generate_grid_plant(actuatedNodes, adjMtx, susceptMtx, inertiasInv, dampings, Ts);
 
 adjustLocality = true;
-%plot_graph(adjMtx, nodeCoords, 'k')
+
+%% Plot graph and actuated coordinates
+plot_graph(adjMtx, nodeCoords, 'k')
+for i=1:numActs
+    node = actuatedNodes(i);
+    plot_special_vertex(node, nodeCoords, 'r')
+end
 
 %% Get locality
 locality = get_ideal_locality(sys, params, adjustLocality);
