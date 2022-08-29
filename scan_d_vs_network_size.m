@@ -15,7 +15,7 @@ seeds = {[700, 701, 702, 703, 704], % gridSize = 4
          [700, 703, 704, 705, 706], % gridSize = 5
          [700, 702, 706, 707, 709], % gridSize = 6
          [700, 705, 707, 709, 713], % gridSize = 8
-         [700, 702, 705, 707, 710]  % gridSize = 11, connectThresh=0.6
+         [700, 702, 707, 710, 712]  % gridSize = 11, connectThresh=0.6
         };
 
 plotTopology = false;
@@ -33,7 +33,7 @@ for i=1:numGridSizes
 
     ct = connectThresh;
     if gridSize >= 11
-        ct= 0.6;
+        ct = 0.6;
     end
     for j=1:numSimsPerPt
         seed = seeds{i}(j);
