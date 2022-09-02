@@ -9,7 +9,6 @@ specRads      = [0.5, 1.0, 1.5, 2.0, 2.5];
 actDens       = 1.0; % and 0.8
 connectThresh  = 0.65;
 Ts             = 0.2;
-adjustLocality = true;
 
 % Need to pick seeds such that grid is fully connected
 seeds = [700, 703, 704, 705, 706]; % for gridSize = 5
@@ -50,7 +49,10 @@ for i=1:numSpecRads
         specRadOriginal = max(abs(eig(sys.A)));
         sys.A           = sys.A / specRadOriginal * specRads(i);
         
-        locSizes(i,j) = get_ideal_locality(sys, params, adjustLocality);
+        % Use custom communication structure for grid
+        sys.AComm = adjust_grid_sys_locality(sys.A);
+
+        locSizes(i,j) = get_ideal_locality(sys, params);
     end
 end
 

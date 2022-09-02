@@ -1,8 +1,7 @@
-function mtx = get_local_subspace(sys, x0, params, adjustLocality, eps)
+function mtx = get_local_subspace(sys, x0, params, eps)
 % We use tFIR and locality size from params
 % Space of local trajectories is proportional to the size of Image(mtx)
-% adjustLocality: adjust definition of locality to work with grid example
-% eps           : how to determine whether solution exists
+% eps : how to determine whether solution exists
 
 Nx   = sys.Nx; Nu = sys.Nu; T = params.tFIR_;
 nPhi = Nx*T + Nu*(T-1);
@@ -10,14 +9,9 @@ ZAB  = sparse(get_constraint_zab(sys, T));
 IO   = [eye(Nx); zeros(Nx*(T-1), Nx)];
 h    = vec(IO);
 
-if adjustLocality
-    PsiSupp = get_sparsity_psi(sys, params, adjustLocality);
-else
-    PsiSupp = get_sparsity_psi(sys, params);
-end
-PsiSupp  = PsiSupp(:, 1:Nx);
+PsiSupp  = get_sparsity_psi(sys, params);
+PsiSupp  = PsiSupp(:, 1:Nx); % The rest of the matrix is for robust only
 suppIdx  = find(PsiSupp);
-suppSize = length(suppIdx);
 
 mtx = [];
 for i=1:Nx
@@ -28,7 +22,7 @@ for i=1:Nx
     
     % Check if there is a solution
     Hi       = ZAB(:,myIdx);
-    hi       = h((i-1)*Nx*T+1:i*Nx*T);
+    hi       = h((i-1)*Nx*T+1:i*Nx*T);    
     testSol  = Hi\hi;
     
     % Note: using max instead of 2-norm to make this check less

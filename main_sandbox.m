@@ -2,12 +2,14 @@ clear all; clc;
 warning off;
 
 %% Grid example
-seed          = 706;
+seed          = 400;
 gridSize      = 7;
-tFIR          = 15;
+tFIR          = 10;
 connectThresh = 0.6;
-actDens       = 0.6;
+actDens       = 1.0;
 Ts            = 0.2;
+
+visualize = false;
 
 params       = MPCParams();
 params.tFIR_ = tFIR;
@@ -19,17 +21,20 @@ rng(seed); % For actuated nodes
 actuatedNodes = randsample(numNodes, numActs);
 sys = generate_grid_plant(actuatedNodes, adjMtx, susceptMtx, inertiasInv, dampings, Ts);
 
-adjustLocality = true;
+% Use custom communication structure for grid
+sys.AComm = adjust_grid_sys_locality(sys.A);
 
 %% Plot graph and actuated coordinates
-plot_graph(adjMtx, nodeCoords, 'k')
-for i=1:numActs
-    node = actuatedNodes(i);
-    plot_special_vertex(node, nodeCoords, 'r')
+if visualize
+    plot_graph(adjMtx, nodeCoords, 'k')
+    for i=1:numActs
+        node = actuatedNodes(i);
+        plot_special_vertex(node, nodeCoords, 'r')
+    end
 end
 
 %% Get locality
-locality = get_ideal_locality(sys, params, adjustLocality);
+locality = get_ideal_locality(sys, params);
 
 %% Setup for control problem
 x0 = rand(sys.Nx, 1);
@@ -70,7 +75,7 @@ cvx_end
 %% Calculate localized trajectory [Adapted from mpc_centralized]
 fprintf('Calculating localized trajectory\n');
 
-PsiSupp = get_sparsity_psi(sys, params, adjustLocality); 
+PsiSupp = get_sparsity_psi(sys, params); 
 PsiSupp = PsiSupp(:, 1:Nx);
 suppSizePsi = sum(sum(PsiSupp));
 

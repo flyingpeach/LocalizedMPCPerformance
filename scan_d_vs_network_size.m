@@ -8,7 +8,6 @@ gridSizes      = [4, 5, 6, 8, 11];
 actDens        = 1.0; % and 0.8
 connectThresh  = 0.65;
 Ts             = 0.2;
-adjustLocality = true;
 
 % Need to pick seeds such that grid is fully connected
 seeds = {[700, 701, 702, 703, 704], % gridSize = 4
@@ -47,6 +46,9 @@ for i=1:numGridSizes
 
         actuatedNodes = randsample(numNodes, numActs);
         systems{i,j}  = generate_grid_plant(actuatedNodes, adjMtx, susceptMtx, inertiasInv, dampings, Ts);
+        
+        % Use custom communication structure for grid
+        systems{i,j}.AComm = adjust_grid_sys_locality(systems{i,j}.A);
     end
 end
 
@@ -59,7 +61,7 @@ for i=1:numGridSizes
     fprintf('Simulating network size %d of %d\n', i, numGridSizes);
     for j=1:numSimsPerPt
         fprintf('\tSim %d of %d\n', j, numSimsPerPt)
-        locSizes(i,j) = get_ideal_locality(systems{i,j}, params, adjustLocality);
+        locSizes(i,j) = get_ideal_locality(systems{i,j}, params);
     end
 end
 
