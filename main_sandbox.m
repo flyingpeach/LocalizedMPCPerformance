@@ -3,8 +3,8 @@ warning off;
 
 %% Grid example
 seed          = 400;
-gridSize      = 7;
-tFIR          = 10;
+gridSize      = 11;
+tFIR          = 15;
 connectThresh = 0.6;
 actDens       = 1.0;
 Ts            = 0.2;
@@ -24,6 +24,14 @@ sys = generate_grid_plant(actuatedNodes, adjMtx, susceptMtx, inertiasInv, dampin
 % Use custom communication structure for grid
 sys.AComm = adjust_grid_sys_locality(sys.A);
 
+%% Convert into format appropriate for python read-in
+Nx    = sys.Nx;
+Nu    = sys.Nu;
+A     = sys.A;
+B2    = sys.B2;
+AComm = sys.AComm;
+save('sandbox.mat', 'Nx', 'Nu', 'A', 'B2', 'AComm');
+
 %% Plot graph and actuated coordinates
 if visualize
     plot_graph(adjMtx, nodeCoords, 'k')
@@ -34,7 +42,9 @@ if visualize
 end
 
 %% Get locality
+tic;
 locality = get_ideal_locality(sys, params);
+toc
 
 %% Setup for control problem
 x0 = rand(sys.Nx, 1);
