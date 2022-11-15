@@ -7,7 +7,7 @@ Nx   = sys.Nx; Nu = sys.Nu; T = params.tFIR_;
 nPhi = Nx*T + Nu*(T-1);
 ZAB  = sparse(get_constraint_zab(sys, T));
 IO   = [eye(Nx); zeros(Nx*(T-1), Nx)];
-h    = vec(IO);
+k    = vec(IO);
 
 PsiSupp  = get_sparsity_psi(sys, params);
 PsiSupp  = PsiSupp(:, 1:Nx); % The rest of the matrix is for robust only
@@ -22,16 +22,17 @@ for i=1:Nx
     
     % Check if there is a solution
     Hi       = ZAB(:,myIdx);
-    hi       = h((i-1)*Nx*T+1:i*Nx*T);    
-    testSol  = Hi\hi;
+    ki       = k((i-1)*Nx*T+1:i*Nx*T);    
+    testSol  = Hi\ki;
     
     % Note: using max instead of 2-norm to make this check less
     %       dimension-dependent
-    if max(abs(Hi*testSol - hi)) > eps % No solution exists
+    if max(abs(Hi*testSol - ki)) > eps % No solution exists
         mtx = 0;
         return;
     end
     
+    % IHHi     = speye(nCols) - pinv(full(Hi))*Hi; % For curiosity
     IHHi     = speye(nCols) - Hi\Hi;
     zeroCols = false(nCols,1); % Get rid of zero columns
     for j=1:nCols
@@ -39,7 +40,7 @@ for i=1:Nx
             zeroCols(j) = true;
         end
     end
-    IHHi(:,zeroCols) = [];
+    IHHi(:,zeroCols) = []; % Comment this out when we want full matrix
     
     xi  = x0(i)*speye(nPhi); 
     mtx = [mtx xi(Nx+1:end,myIdx)*IHHi];
