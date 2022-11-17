@@ -5,7 +5,7 @@ warning off;
 numSimsPerPt   = 5;
 tFIR           = 15;
 gridSizes      = [4, 5, 6, 8, 11];
-actDens        = 1.0; % and 0.8
+actDens        = 1.0;
 connectThresh  = 0.65;
 Ts             = 0.2;
 
@@ -56,21 +56,31 @@ end
 params       = MPCParams();
 params.tFIR_ = tFIR;
 locSizes     = zeros(numGridSizes, numSimsPerPt);
+parTimes     = zeros(numGridSizes, numSimsPerPt);
+rankTimes    = zeros(numGridSizes, numSimsPerPt);
 
 for i=1:numGridSizes
     fprintf('Simulating network size %d of %d\n', i, numGridSizes);
     for j=1:numSimsPerPt
         fprintf('\tSim %d of %d\n', j, numSimsPerPt)
-        locSizes(i,j) = get_ideal_locality(systems{i,j}, params);
+        [locSizes(i,j), parTimes(i,j), rankTimes(i,j)] = get_ideal_locality(systems{i,j}, params);
     end
 end
+
+save('data/scan_time_vs_network_size.mat');
 
 %% Plots
 % Remember that our "locality" is actually different from paper
 % paper: d=0 means only self communication
 % us   : d=1 means only self communication
 
-figure();
-plot(gridSizes.^2, mean(locSizes,2) - 1);
+% TODO: Label y axis with 10^
+% TODO: plot average and standard deviations
+
+load('data/scan_time_vs_network_size.mat');
+figure(); hold on;
+plot(gridSizes.^2, log(mean(parTimes,2)));
+plot(gridSizes.^2, log(mean(rankTimes,2)));
+legend('Matrix construction (parallelized)', 'Rank determination (non-parallelized)');
 xlabel('# Subsystems');
-ylabel('Minimum locality size');
+ylabel('Time (s)');

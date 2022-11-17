@@ -1,4 +1,4 @@
-function mtx = get_local_subspace(sys, x0, params, eps)
+function [mtx, parTime] = get_local_subspace(sys, x0, params, eps)
 % We use tFIR and locality size from params
 % Space of local trajectories is proportional to the size of Image(mtx)
 % eps : how to determine whether solution exists
@@ -14,7 +14,10 @@ PsiSupp  = PsiSupp(:, 1:Nx); % The rest of the matrix is for robust only
 suppIdx  = find(PsiSupp);
 
 mtx = [];
+
+parTimes = zeros(Nx, 1);
 for i=1:Nx
+    tic;
     idxStart = (i-1)*nPhi+1;
     idxEnd   = i*nPhi;
     myIdx    = suppIdx(suppIdx >= idxStart & suppIdx <= idxEnd) - (i-1)*nPhi;
@@ -29,6 +32,8 @@ for i=1:Nx
     %       dimension-dependent
     if max(abs(Hi*testSol - ki)) > eps % No solution exists
         mtx = 0;
+        parTimes(i) = toc;
+        parTime = mean(parTimes);
         return;
     end
     
@@ -44,4 +49,7 @@ for i=1:Nx
     
     xi  = x0(i)*speye(nPhi); 
     mtx = [mtx xi(Nx+1:end,myIdx)*IHHi];
+    parTimes(i) = toc;
 end
+
+parTime = mean(parTimes);

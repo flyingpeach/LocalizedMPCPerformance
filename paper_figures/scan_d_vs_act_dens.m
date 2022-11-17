@@ -53,11 +53,16 @@ for i=1:numActDens
     end
 end
 
+save('data/scan_d_vs_act_dens.mat');
+
 %% Plots
 % Remember that our "locality" is actually different from paper
 % paper: d=0 means only self communication
 % us   : d=1 means only self communication
 
+% TODO: plot average and standard deviations
+
+load('data/scan_d_vs_act_dens.mat');
 figure();
 plot(actDensities, mean(locSizes,2) - 1);
 xlabel('Actuation density (freq only)');
