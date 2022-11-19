@@ -1,10 +1,11 @@
-function [locality, parTime, rankTime] = get_ideal_locality(sys, params, varargin)
+function [locality, parTime, rankTime, rankDef] = get_ideal_locality(sys, params, varargin)
 % locality: size of local communication region (d-hop neighbors) for which
 %           the size of the trajectory space is unchanged compared to 
 %           global communication, assuming x0 is dense
 %           convention: d=1 means self-communication only
 % parTime : time (seconds) taken for parallel part of algorithm
 % rankTime: time (seconds) taken for rank determination (not parallel right now)
+% rankDef : whether we encountered rank deficiency
 
 % params : MPCParams(); the locality_ field will be populated with the 
 %          ideal locality
@@ -23,6 +24,7 @@ x0 = ones(sys.Nx, 1);
 
 parTime  = 0;
 rankTime = 0;
+rankDef  = false;
 
 maxLoc   = sys.Nx;
 for locality=2:maxLoc
@@ -32,7 +34,10 @@ for locality=2:maxLoc
     [rankRatio, parTime1, rankTime1] = get_rank_ratio(sys, x0, params, eps);
     parTime  = parTime + parTime1;
     rankTime = rankTime + rankTime1;
+    
     if rankRatio == 1
         break;
+    elseif rankRatio > 0
+        rankDef = true; % Rank deficiency found!
     end
 end
