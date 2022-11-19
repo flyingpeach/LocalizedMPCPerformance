@@ -2,7 +2,7 @@ clear all; clc;
 warning off;
 
 %% Search for rank deficiency
-numSims = 100;
+numSims = 300;
 
 gridSizeMin = 4;
 gridSizeMax = 11;
