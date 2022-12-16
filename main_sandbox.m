@@ -107,8 +107,11 @@ for k = 1:T-1
     obj2 = obj2 + vect'*vect;
 end
 
-% Constraints
-ZAB*Psi == IO; % dynamics constraints
+% Dynamics constraints
+% Note: have to use this formulation b/c otherwise  cvx reports infeasible
+%       for ZAB*Psi == IO, even if we set low precision
+EPS = 1e-8;
+norm(ZAB*Psi - IO, 'fro') <= EPS;
 minimize(obj2)
 cvx_end
 
