@@ -3,6 +3,7 @@ function [xs, us] = local_mpc(sys, x0, params, tHorizon)
 %            note: terminal cost/constr not accounted for in this case
 % tHorizon : how long to run MPC for
 % Adapted from mpc_centralized; specialized for nominal only
+% on a computer with no GPU (i.e. mine), this is the fastest way to do this
 
 params.sanity_check_cent();
 
@@ -35,12 +36,12 @@ for t=1:tHorizon-1
 
     for k=1:T-1
         ku   = Nx*T + get_range(k, Nu); % rows of Psi representing Psiu
-        vect = RSqrt*Psi(ku, 1:Nx)*x0;
+        vect = RSqrt*Psi(ku, 1:Nx)*xs(:,t);
         obj  = obj + vect'*vect;
     end
     for k=1:T
         kx   = get_range(k, Nx); % rows of Psi representing Psix
-        vect = QSqrt*Psi(kx, 1:Nx)*x0;
+        vect = QSqrt*Psi(kx, 1:Nx)*xs(:,t);
         obj  = obj + vect'*vect;
     end
     
@@ -51,7 +52,7 @@ for t=1:tHorizon-1
     norm(ZAB*Psi - IO, 'fro') <= EPS;
     
     % State/input constraints
-    H*Psi(:, 1:Nx)*x0 <= h;
+    H*Psi(:, 1:Nx)*xs(:,t) <= h;
     
     minimize(obj)
     cvx_end

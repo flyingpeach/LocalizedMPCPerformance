@@ -69,9 +69,11 @@ usGlob = cell(numSims,1);
 xsLoc  = cell(numSims,1);
 usLoc  = cell(numSims,1);
 
-objGlobs  = nan(numSims,1);
-objLocs   = nan(numSims,1);
-costDiffs = nan(numSims,1);
+objGlobs   = nan(numSims,1);
+objLocs    = nan(numSims,1);
+costDiffs  = nan(numSims,1);
+stateDiffs = nan(numSims,1);
+inputDiffs = nan(numSims,1);
 
 for i=1:numSims
     fprintf('Running sim %d of %d \n', i, numSims);
@@ -104,17 +106,43 @@ for i=1:numSims
     % we want to see live progress/debug if needed
     objGlobs(i)  = get_cost_fn(params, xsGlob{i}, usGlob{i});
     objLocs(i)   = get_cost_fn(params, xsLoc{i}, usLoc{i});
-    costDiffs(i) = (objLocs(i) - objGlobs(i))/objGlobs(i);
-    fprintf('Cost diff: %.4e\n\n', costDiffs(i)); % Should be small    
+    costDiffs(i) = abs(objLocs(i) - objGlobs(i))/objGlobs(i);
+    
+    stateDiffs(i) = norm(xsGlob{i} - xsLoc{i}, 'fro');
+    inputDiffs(i) = norm(usGlob{i} - usLoc{i}, 'fro');
+    
+    % Should be small  
+    fprintf('Cost  diff: %.4e\n\n', costDiffs(i));
+    fprintf('State diff: %.4e\n\n', stateDiffs(i));
+    fprintf('Input diff: %.4e\n\n', inputDiffs(i));
 end
 
 save('data/dynamics_simulations.mat');
 
 %% Plots
 
-costDiffs
-max(costDiffs)
+maxCostDiff      = max(costDiffs)
+maxStateDiffFrob = max(stateDiffs)
+maxInputDiffFrob = max(inputDiffs)
 
-% Compare differences of states and inputs
-% Choose one to plot if needed?
+% Pick a sample trajectory (sanity check)
+plotSim   = 1;
+plotState = 10;
+plotInput = 5;
+
+xTime = 1:tHorizon;
+uTime = 1:tHorizon-1;
+
+figure();
+subplot(2,1,1); hold on;
+title('State');
+plot(xTime, xsGlob{plotSim}(plotState,:));
+plot(xTime, xsLoc{plotSim}(plotState,:));
+
+subplot(2,1,2); hold on;
+title('Input');
+plot(uTime, usGlob{plotSim}(plotInput,:));
+plot(uTime, usLoc{plotSim}(plotInput,:));
+xlim([1 tHorizon]);
+
 
