@@ -43,24 +43,20 @@ for i=1:numSims
 end
 
 %% Check locality sizes
-% params       = MPCParams();
-% params.tFIR_ = tFIR;
-% locSizes     = zeros(1, numSims);
-% 
-% for i=1:numSims
-%     fprintf('Checking system %d of %d\n', i, numSims);
-%     locSizes(i) = get_ideal_locality(systems{i}, params);
-% end
-% 
-% % Remember that our "locality" is actually different from paper
-% % paper: d=0 means only self communication
-% % us   : d=1 means only self communication
-% 
-% locSizes - 1
+params       = MPCParams();
+params.tFIR_ = tFIR;
+locSizes     = zeros(1, numSims);
 
-%% HACK: remove this, uncomment previous section
-% we have run this already with locSizes
-locSizes = 2*ones(1, numSims);
+for i=1:numSims
+    fprintf('Checking system %d of %d\n', i, numSims);
+    locSizes(i) = get_ideal_locality(systems{i}, params);
+end
+
+% Remember that our "locality" is actually different from paper
+% paper: d=0 means only self communication
+% us   : d=1 means only self communication
+
+locSizes - 1
 
 %% Dynamics
 pList  = cell(numSims,1);

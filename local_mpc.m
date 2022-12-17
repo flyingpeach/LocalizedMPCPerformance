@@ -10,8 +10,8 @@ params.sanity_check_cent();
 % For convenience
 Nx = sys.Nx; Nu = sys.Nu; T = params.tFIR_;
 nPhi  = Nx*T + Nu*(T-1);
-QSqrt = params.QSqrt_;
-RSqrt = params.RSqrt_;
+QSqrt = sparse(params.QSqrt_);
+RSqrt = sparse(params.RSqrt_);
 
 xs = zeros(Nx, tHorizon);
 us = zeros(Nu, tHorizon-1);
@@ -21,9 +21,10 @@ xs(:,1) = x0;
 PsiSupp = get_sparsity_psi(sys, params); 
 PsiSupp = PsiSupp(:, 1:Nx);
 suppSizePsi = sum(sum(PsiSupp));
-ZAB         = get_constraint_zab(sys, T);
-IO          = [eye(Nx); zeros(Nx*(T-1), Nx)];
+ZAB         = sparse(get_constraint_zab(sys, T));
+IO          = [speye(Nx); sparse(Nx*(T-1), Nx)];
 [H, h]      = get_constraint_h(sys, params);
+H = sparse(H);
 
 for t=1:tHorizon-1
     fprintf('Calculating time %d of %d\n', t+1, tHorizon);
