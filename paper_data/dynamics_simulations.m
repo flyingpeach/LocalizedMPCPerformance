@@ -116,6 +116,7 @@ end
 save('data/dynamics_simulations.mat');
 
 %% Plots
+load('data/dynamics_simulations.mat');
 
 maxCostDiff      = max(costDiffs)
 maxStateDiffFrob = max(stateDiffs)
