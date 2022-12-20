@@ -39,6 +39,14 @@ for i=1:Nx
     
     % IHHi     = speye(nCols) - pinv(full(Hi))*Hi; % For curiosity
     IHHi     = speye(nCols) - Hi\Hi;
+    
+    if(any(isnan(IHHi(:)))) % Conditioning poor, no solution available
+        mtx = 0;
+        parTimes(i) = toc;
+        parTime = mean(parTimes);
+        return;
+    end
+    
     zeroCols = false(nCols,1); % Get rid of zero columns
     for j=1:nCols
         if isempty(find(IHHi(:,j),1))
