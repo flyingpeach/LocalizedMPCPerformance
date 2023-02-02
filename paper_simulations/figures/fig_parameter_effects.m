@@ -19,7 +19,7 @@ MarkerSize = LineWidth*8;
 figure(2);
 
 %% Actuation density
-load('data/scan_d_vs_act_dens.mat');
+load('data/d_vs_act_dens.mat');
 actMeans = mean(locSizes,2)' - 1;
 actStds  = std(locSizes, 0, 2)';
 color    = [0 0 0];
@@ -36,13 +36,13 @@ set(actFill, 'EdgeAlpha', 0);
 
 set(gca, 'FontSize',fontsizeAxis)
 xlabel({'Actuation density'}, 'Interpreter', 'latex', 'Fontsize', fontsizeLabel);
-ylabel({'Minimum locality size'}, 'Interpreter', 'latex', 'Fontsize', fontsizeLabel);
+ylabel({'Optimal locality size'}, 'Interpreter', 'latex', 'Fontsize', fontsizeLabel);
 xlim([0.1 1.1]);
 ylim([0.8 6.2]);
 
 
 %% Network sizes
-load('data/scan_d_vs_network_size.mat');
+load('data/d_vs_network_size.mat');
 netMeans = {};
 netStds  = {};
 
@@ -74,7 +74,7 @@ xlim([10 126]);
 ylim([0.8 6.2]);
 
 %% Horizon size
-load('data/scan_d_vs_horizon_size.mat');
+load('data/d_vs_horizon_size.mat');
 horMeans = {};
 horStds  = {};
 
@@ -101,7 +101,7 @@ for actIdx=numActDens:-1:1
 end
 
 set(gca,'FontSize',fontsizeAxis)
-xlabel({'Horizon size'}, 'Interpreter', 'latex', 'Fontsize', fontsizeLabel);
+xlabel({'Horizon length'}, 'Interpreter', 'latex', 'Fontsize', fontsizeLabel);
 xlim([3 32]);
 ylim([0.8 6.2]);
 

@@ -16,15 +16,16 @@ fontsizeTitle  = 14;
 LineWidth  = 4;
 MarkerSize = LineWidth*8;
 
-%% Figure: algorithm runtime
+figure(1);
 
-load('data/scan_time_vs_network_size.mat');
+%% Runtime vs. network size
+load('data/runtime_vs_network_size.mat');
 parMeans  = mean(parTimes, 2)';
 parStds   = std(parTimes, 0, 2)';
 rankMeans = mean(rankTimes, 2)';
 rankStds  = std(rankTimes, 0, 2)';
 
-figure(1); box on; 
+subplot(1,2,1); box on;
 % HACK to overcome MATLAB bug
 semilogy(linspace(0,100,5), linspace(1,1.1,5), 'Color', [1 1 1], 'HandleVisibility', 'off');
 
@@ -48,14 +49,49 @@ alpha(.4);
 set(rankFill, 'EdgeAlpha', 0);
 
 % Legend
-leg = legend('Rank determination (non-parallelized)', 'Matrix construction (parallelized)');
+leg = legend('Rank determination', 'Matrix construction');
 set(leg, 'Interpreter', 'latex'); 
 set(leg, 'Fontsize', fontsizeLegend);
 
 % Figure settings
 set(gca, 'FontSize',fontsizeAxis)
-title({'\textbf{Algorithm runtime}'}, 'Interpreter', 'latex', 'Fontsize', fontsizeTitle);
 xlabel({'\# of subsystems in the network'}, 'Interpreter', 'latex', 'Fontsize', fontsizeLabel);
 ylabel({'Avg. total runtime (s)'}, 'Interpreter', 'latex', 'Fontsize', fontsizeLabel);
-xlim([5 125]);
-ylim([3e-4 1e1]);
+xlim([14 123]);
+ylim([3e-4 15]);
+
+%% Runtime vs. horizon size
+load('data/runtime_vs_horizon_size.mat');
+parMeans  = mean(parTimes, 2)';
+parStds   = std(parTimes, 0, 2)';
+rankMeans = mean(rankTimes, 2)';
+rankStds  = std(rankTimes, 0, 2)';
+
+subplot(1,2,2); box on;
+% HACK to overcome MATLAB bug
+semilogy(linspace(0,100,5), linspace(1,1.1,5), 'Color', [1 1 1], 'HandleVisibility', 'off');
+
+% Mean runtimes
+hold on; % Have to do this after first semilogy otherwise linear plot
+semilogy(Ts, rankMeans, '.-', 'LineWidth', LineWidth, ... 
+         'MarkerSize', MarkerSize, 'Color', colors{3}, ...
+         'MarkerEdge', colors{3}, 'MarkerFaceColor', colors{3});
+semilogy(Ts, parMeans, '.-', 'LineWidth', LineWidth, ... 
+         'MarkerSize', MarkerSize, 'Color', colors{1}, ...
+         'MarkerEdge', colors{1}, 'MarkerFaceColor', colors{1});
+
+% Standard deviations of runtimes
+parFill = fill([Ts,fliplr(Ts)], ...
+     [parMeans - parStds, fliplr(parMeans + parStds)], colors{1});
+alpha(.4);
+set(parFill, 'EdgeAlpha', 0);
+rankFill = fill([Ts,fliplr(Ts)], ...
+     [rankMeans - rankStds, fliplr(rankMeans + rankStds)], colors{3});
+alpha(.4);
+set(rankFill, 'EdgeAlpha', 0);
+
+% Figure settings
+set(gca, 'FontSize',fontsizeAxis)
+xlabel({'Horizon length'}, 'Interpreter', 'latex', 'Fontsize', fontsizeLabel);
+xlim([4 31]);
+ylim([3e-4 15]);
