@@ -66,14 +66,14 @@ for actIdx=1:numActDens
     end
 end
 
-save('data/scan_d_vs_spec_radius.mat');
+save('data/d_vs_spec_radius.mat');
 
 %% Plots
 % Remember that our "locality" is actually different from paper
 % paper: d=0 means only self communication
 % us   : d=1 means only self communication
 
-load('data/scan_d_vs_spec_radius.mat');
+load('data/d_vs_spec_radius.mat');
 
 figure(); hold on;
 for actIdx=1:numActDens

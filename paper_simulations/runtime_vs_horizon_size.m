@@ -53,14 +53,14 @@ for i=1:numHorizonSizes
     end
 end
 
-save('data/scan_time_vs_horizon_size.mat');
+save('data/runtime_vs_horizon_size.mat');
 
 %% Plots
 % Remember that our "locality" is actually different from paper
 % paper: d=0 means only self communication
 % us   : d=1 means only self communication
 
-load('data/scan_time_vs_horizon_size.mat');
+load('data/runtime_vs_horizon_size.mat');
 figure(); hold on;
 plot(Ts, log(mean(parTimes,2)));
 plot(Ts, log(mean(rankTimes,2)));
