@@ -75,7 +75,7 @@ for i=1:numSims
     fprintf('Running sim %d of %d \n', i, numSims);
     sys = systems{i};
     params = MPCParams();
-    params.tFIR_  = tFIR;    
+    params.tFIR_ = T+1;   
     
     params.QSqrt_ = diag(rand(sys.Nx, 1)); % [0,1]
     params.RSqrt_ = diag(rand(sys.Nu, 1)); % [0,1]
