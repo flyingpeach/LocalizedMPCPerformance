@@ -13,7 +13,7 @@ actDensMax = 1.0;
 specRadMin = 0.5;
 specRadMax = 2.5;
 
-horizonMin = 5;  % Corresponds to T in paper
+horizonMin = 3;  % Corresponds to T in paper
 horizonMax = 20;
 
 Ts = 0.2;

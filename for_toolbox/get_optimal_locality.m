@@ -42,7 +42,7 @@ for locality=2:maxLoc
     if rankRatio == 1
         break;
     elseif rankRatio > 0
-        fprintf('Rank deficiency encountered\n'); % This is a rare case, give printout
+        fprintf('Rank deficiency encountered, rank ratio = %d\n', rankRatio); % This is a rare case, give printout
         rankDef = true;
     end
 end
