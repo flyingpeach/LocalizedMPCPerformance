@@ -3,8 +3,7 @@ warning off;
 
 %% User-specified parameters
 numSimsPerPt  = 5;
-tFIR          = 15;
-gridSize      = 5;
+T             = 15;gridSize      = 5;
 specRads      = [0.5, 1.0, 1.5, 2.0, 2.5];
 actDensities   = [1.0, 0.8, 0.6];
 connectThresh  = 0.65;
@@ -45,7 +44,7 @@ end
 
 %% Simulations
 params       = MPCParams();
-params.tFIR_ = tFIR;
+params.tFIR_ = T+1; % Code and paper use different conventions
 numSpecRads  = length(specRads);
 locSizes     = cell(numActDens, 1);
 
@@ -73,8 +72,6 @@ save('data/scan_d_vs_spec_radius.mat');
 % Remember that our "locality" is actually different from paper
 % paper: d=0 means only self communication
 % us   : d=1 means only self communication
-
-% TODO: plot average and standard deviations
 
 load('data/scan_d_vs_spec_radius.mat');
 

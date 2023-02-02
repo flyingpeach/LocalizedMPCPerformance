@@ -13,8 +13,8 @@ actDensMax = 1.0;
 specRadMin = 0.5;
 specRadMax = 2.5;
 
-horizonMin = 4;
-horizonMax = 11;
+horizonMin = 5;  % Corresponds to T in paper
+horizonMax = 20;
 
 Ts = 0.2;
 rng(2022);
@@ -46,7 +46,7 @@ end
 
 %% Simulations
 specRads  = rand(1, numSims) * (specRadMax-specRadMin) + specRadMin;
-horizons = randi([horizonMin, horizonMax], 1, numSims);
+horizons  = randi([horizonMin, horizonMax], 1, numSims);
 locSizes  = zeros(1, numSims);
 rankDefs  = false(1, numSims);
 
@@ -54,7 +54,7 @@ for j=1:numSims
     fprintf('Simulation %d of %d\n', j, numSims);
 
     params = MPCParams();
-    params.tFIR_ = horizons(j);
+    params.tFIR_ = horizons(j) + 1; % Code and paper use different conventions
     
     sys             = systems{j}.copy(); % deepcopy
     specRadOriginal = max(abs(eig(sys.A)));

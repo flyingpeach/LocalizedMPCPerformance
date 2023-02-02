@@ -87,14 +87,14 @@ subplot(1,3,3); box on; hold on;
 
 for actIdx=numActDens:-1:1
     color = colors{actIdx};
-    plot(tFIRs, horMeans{actIdx}, '.-', 'LineWidth', LineWidth, ... 
+    plot(Ts, horMeans{actIdx}, '.-', 'LineWidth', LineWidth, ... 
         'MarkerSize', MarkerSize, 'Color', color, ...
         'MarkerEdge', color, 'MarkerFaceColor', color);
 end
 
 for actIdx=numActDens:-1:1
     color = colors{actIdx};
-    horFill{actIdx} = fill([tFIRs, fliplr(tFIRs)], ...
+    horFill{actIdx} = fill([Ts, fliplr(Ts)], ...
            [horMeans{actIdx} - horStds{actIdx}, fliplr(horMeans{actIdx} + horStds{actIdx})], color);
     alpha(.4);
     set(horFill{actIdx}, 'EdgeAlpha', 0, 'HandleVisibility', 'off');

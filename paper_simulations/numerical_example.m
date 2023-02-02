@@ -8,14 +8,14 @@ B = [1 0;
      0 1];
 Nx = 3;
 Nu = 2;
-T  = 2;
+T  = 1;
 
 sys = LTISystem();
 sys.A = A; sys.B2 = B;
 sys.Nx = Nx; sys.Nu = Nu;
 
 params       = MPCParams();
-params.tFIR_ = T;
+params.tFIR_ = T+1; % Code and paper use different conventions
 
 locality = get_ideal_locality(sys, params)
 

@@ -3,7 +3,7 @@ warning off;
 
 %% User-specified parameters
 numSims        = 20;
-tFIR           = 15;
+T              = 15;
 actDensity     = 1.0;
 gridSize       = 11;
 connectThresh  = 0.6;
@@ -44,7 +44,7 @@ end
 
 %% Check locality sizes
 params       = MPCParams();
-params.tFIR_ = tFIR;
+params.tFIR_ = T+1; % Code and paper use different conventions
 locSizes     = zeros(1, numSims);
 
 for i=1:numSims

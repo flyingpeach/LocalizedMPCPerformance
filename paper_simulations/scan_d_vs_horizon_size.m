@@ -3,7 +3,7 @@ warning off;
 
 %% User-specified parameters
 numSimsPerPt   = 5;
-tFIRs          = [5, 10, 15, 20, 25, 30];
+Ts             = [5, 10, 15, 20, 25, 30];
 gridSize       = 5;
 actDensities   = [1.0, 0.8, 0.6];
 connectThresh  = 0.65;
@@ -53,7 +53,7 @@ for actIdx=1:numActDens
     fprintf('Simulating actuation density %d of %d\n', actIdx, numActDens);
     
     for i=1:numHorizonSizes
-        params.tFIR_ = tFIRs(i);
+        params.tFIR_ = Ts(i) + 1; % Code and paper use different conventions
         fprintf('Simulating horizon size %d of %d\n', i, numHorizonSizes);
         for j=1:numSimsPerPt
             fprintf('\tSim %d of %d\n', j, numSimsPerPt);     
@@ -69,13 +69,11 @@ save('data/scan_d_vs_horizon_size.mat');
 % paper: d=0 means only self communication
 % us   : d=1 means only self communication
 
-% TODO: plot average and standard deviations
-
 load('data/scan_d_vs_horizon_size.mat');
 figure(); hold on;
 for actIdx=1:numActDens
     actDens = actDensities(actIdx);
-    plot(tFIRs, mean(locSizes{actIdx},2) - 1);
+    plot(Ts, mean(locSizes{actIdx},2) - 1);
 end
 
 legend('100% Actuated', '80% Actuated', '60% Actuated'); % Change this if needed

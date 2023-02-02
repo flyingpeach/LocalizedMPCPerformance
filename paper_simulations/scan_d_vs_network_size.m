@@ -3,7 +3,7 @@ warning off;
 
 %% User-specified parameters
 numSimsPerPt   = 5;
-tFIR           = 15;
+T              = 15;
 gridSizes      = [4, 5, 6, 8, 11];
 actDensities   = [1.0, 0.8, 0.6];
 connectThresh  = 0.65;
@@ -58,7 +58,7 @@ end
 
 %% Simulations
 params       = MPCParams();
-params.tFIR_ = tFIR;
+params.tFIR_ = T+1; % Code and paper use different conventions
 locSizes     = cell(numActDens, 1);
 
 for actIdx=1:numActDens
@@ -81,8 +81,6 @@ save('data/scan_d_vs_network_size.mat');
 % Remember that our "locality" is actually different from paper
 % paper: d=0 means only self communication
 % us   : d=1 means only self communication
-
-% TODO: plot average and standard deviations
 
 load('data/scan_d_vs_network_size.mat');
 figure(); hold on;

@@ -3,7 +3,7 @@ warning off;
 
 %% User-specified parameters
 numSimsPerPt   = 5;
-tFIR           = 15;
+T              = 15;
 gridSizes      = [4, 5, 6, 8, 11];
 actDens        = 1.0;
 connectThresh  = 0.65;
@@ -54,7 +54,7 @@ end
 
 %% Simulations
 params       = MPCParams();
-params.tFIR_ = tFIR;
+params.tFIR_ = T+1; % Code and paper use different conventions
 locSizes     = zeros(numGridSizes, numSimsPerPt);
 parTimes     = zeros(numGridSizes, numSimsPerPt);
 rankTimes    = zeros(numGridSizes, numSimsPerPt);
@@ -73,9 +73,6 @@ save('data/scan_time_vs_network_size.mat');
 % Remember that our "locality" is actually different from paper
 % paper: d=0 means only self communication
 % us   : d=1 means only self communication
-
-% TODO: Label y axis with 10^
-% TODO: plot average and standard deviations
 
 load('data/scan_time_vs_network_size.mat');
 figure(); hold on;
