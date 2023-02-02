@@ -3,8 +3,8 @@ warning off;
 
 %% Grid example
 seed          = 400;
-gridSize      = 11;
-tFIR          = 15;
+gridSize      = 7;
+T             = 15;
 connectThresh = 0.6;
 actDens       = 1.0;
 Ts            = 0.2;
@@ -12,7 +12,7 @@ Ts            = 0.2;
 visualize = false;
 
 params       = MPCParams();
-params.tFIR_ = tFIR;
+params.tFIR_ = T+1; % Code and paper use different conventions
 
 numNodes      = gridSize * gridSize; 
 numActs       = round(actDens*numNodes);
@@ -23,14 +23,6 @@ sys = generate_grid_plant(actuatedNodes, adjMtx, susceptMtx, inertiasInv, dampin
 
 % Use custom communication structure for grid
 sys.AComm = adjust_grid_sys_locality(sys.A);
-
-%% Convert into format appropriate for python read-in
-Nx    = sys.Nx;
-Nu    = sys.Nu;
-A     = sys.A;
-B2    = sys.B2;
-AComm = sys.AComm;
-save('sandbox.mat', 'Nx', 'Nu', 'A', 'B2', 'AComm');
 
 %% Plot graph and actuated coordinates
 if visualize
@@ -115,5 +107,10 @@ norm(ZAB*Psi - IO, 'fro') <= EPS;
 minimize(obj2)
 cvx_end
 
-objDiff  = norm(obj2 - obj1) / obj1
-trajDiff = norm([vec(xs); vec(us)] - Psi*x0) / norm(xs)
+trajDiff = norm([vec(xs); vec(us)] - Psi*x0) / norm(xs);
+objDiff  = norm(obj2 - obj1) / obj1;
+
+fprintf('Diff between global and localized objectives: %.3e\n', objDiff);
+fprintf('Diff between global and localized trajectory: %.3e\n', trajDiff);
+
+
