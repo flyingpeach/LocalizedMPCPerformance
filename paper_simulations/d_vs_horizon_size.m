@@ -7,7 +7,7 @@ Ts             = [5, 10, 15, 20, 25, 30];
 gridSize       = 5;
 actDensities   = [1.0, 0.8, 0.6];
 connectThresh  = 0.65;
-Ts             = 0.2;
+TsSamp         = 0.2; % Sampling time
 
 % Need to pick seeds such that grid is fully connected
 seeds = [700, 703, 704, 705, 706]; % for gridSize = 5
@@ -34,7 +34,7 @@ for j=1:numSimsPerPt
         numActs = round(actDens*numNodes);
             
         actuatedNodes = randsample(numNodes, numActs);
-        systems{actIdx,j}    = generate_grid_plant(actuatedNodes, adjMtx, susceptMtx, inertiasInv, dampings, Ts);
+        systems{actIdx,j}    = generate_grid_plant(actuatedNodes, adjMtx, susceptMtx, inertiasInv, dampings, TsSamp);
     
         % Use custom communication structure for grid
         systems{actIdx,j}.AComm = adjust_grid_sys_locality(systems{actIdx,j}.A);
@@ -44,7 +44,7 @@ end
 
 %% Simulations
 params          = MPCParams();
-numHorizonSizes = length(tFIRs);
+numHorizonSizes = length(Ts);
 locSizes        = cell(numActDens, 1);
 
 for actIdx=1:numActDens
