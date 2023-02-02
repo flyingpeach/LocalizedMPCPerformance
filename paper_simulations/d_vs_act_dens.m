@@ -49,7 +49,7 @@ for i=1:numActDens
     fprintf('Simulating actuation density size %d of %d\n', i, numActDens);
     for j=1:numSimsPerPt
         fprintf('\tSim %d of %d\n', j, numSimsPerPt);
-        locSizes(i,j) = get_ideal_locality(systems{i,j}, params);
+        locSizes(i,j) = get_optimal_locality(systems{i,j}, params);
     end
 end
 

@@ -63,7 +63,7 @@ for i=1:numGridSizes
     fprintf('Simulating network size %d of %d\n', i, numGridSizes);
     for j=1:numSimsPerPt
         fprintf('\tSim %d of %d\n', j, numSimsPerPt)
-        [locSizes(i,j), parTimes(i,j), rankTimes(i,j)] = get_ideal_locality(systems{i,j}, params);
+        [locSizes(i,j), parTimes(i,j), rankTimes(i,j)] = get_optimal_locality(systems{i,j}, params);
     end
 end
 

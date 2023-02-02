@@ -35,7 +35,7 @@ end
 
 %% Get locality
 tic;
-locality = get_ideal_locality(sys, params);
+locality = get_optimal_locality(sys, params);
 toc
 
 %% Setup for control problem

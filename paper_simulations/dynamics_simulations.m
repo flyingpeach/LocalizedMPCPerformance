@@ -49,7 +49,7 @@ locSizes     = zeros(1, numSims);
 
 for i=1:numSims
     fprintf('Checking system %d of %d\n', i, numSims);
-    locSizes(i) = get_ideal_locality(systems{i}, params);
+    locSizes(i) = get_optimal_locality(systems{i}, params);
 end
 
 % Remember that our "locality" is actually different from paper

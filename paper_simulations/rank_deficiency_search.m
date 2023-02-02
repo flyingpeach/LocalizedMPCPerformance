@@ -60,7 +60,7 @@ for j=1:numSims
     specRadOriginal = max(abs(eig(sys.A)));
     sys.A           = sys.A / specRadOriginal * specRads(j);
     
-    [locSizes(j), ~, ~, rankDefs(j)] = get_ideal_locality(sys, params);
+    [locSizes(j), ~, ~, rankDefs(j)] = get_optimal_locality(sys, params);
     
     if rankDefs(j)
         fprintf('==Rank deficiency found at sim %d\n==', j);

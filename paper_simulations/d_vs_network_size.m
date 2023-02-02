@@ -70,7 +70,7 @@ for actIdx=1:numActDens
         fprintf('Simulating network size %d of %d\n', i, numGridSizes);
         for j=1:numSimsPerPt
             fprintf('\tSim %d of %d\n', j, numSimsPerPt)
-            locSizes{actIdx}(i,j) = get_ideal_locality(systems{actIdx,i,j}, params);
+            locSizes{actIdx}(i,j) = get_optimal_locality(systems{actIdx,i,j}, params);
         end
     end
 end

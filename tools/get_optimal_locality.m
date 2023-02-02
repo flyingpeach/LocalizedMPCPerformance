@@ -1,4 +1,4 @@
-function [locality, parTime, rankTime, rankDef] = get_ideal_locality(sys, params, varargin)
+function [locality, parTime, rankTime, rankDef] = get_optimal_locality(sys, params, varargin)
 % locality: size of local communication region (d-hop neighbors) for which
 %           the size of the trajectory space is unchanged compared to 
 %           global communication, assuming x0 is dense
@@ -9,8 +9,8 @@ function [locality, parTime, rankTime, rankDef] = get_ideal_locality(sys, params
 
 % params : MPCParams(); the locality_ field will be populated with the 
 %          ideal locality
-% adjustLocality: adjust definition of locality to work with grid example
-% eps           : how to determine whether solution exists fpr loc subspace
+% optional input eps: used to determine whether solution exists for local
+%                     subspace; default value is 1e-8
 
 
 if ~isempty(varargin) > 0
@@ -31,13 +31,18 @@ for locality=2:maxLoc
     fprintf('Checking locality size %d\n', locality);
     params.locality_ = locality;
     
-    [rankRatio, parTime1, rankTime1] = get_rank_ratio(sys, x0, params, eps);
+    [mtx, parTime1] = get_local_subspace(sys, x0, params, eps);
+    tic;
+    rankRatio = rank(full(mtx)) / (sys.Nu*(params.tFIR_-1));
+    rankTime1 = toc;
+    
     parTime  = parTime + parTime1;
     rankTime = rankTime + rankTime1;
     
     if rankRatio == 1
         break;
     elseif rankRatio > 0
-        rankDef = true; % Rank deficiency found!
+        fprintf('Rank deficiency encountered\n'); % This is a rare case, give printout
+        rankDef = true;
     end
 end

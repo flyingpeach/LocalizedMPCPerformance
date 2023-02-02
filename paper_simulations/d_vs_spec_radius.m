@@ -61,7 +61,7 @@ for actIdx=1:numActDens
             sys             = systems{actIdx,j}.copy(); % deepcopy
             specRadOriginal = max(abs(eig(sys.A)));
             sys.A           = sys.A / specRadOriginal * specRads(i);
-            locSizes{actIdx}(i,j) = get_ideal_locality(sys, params);
+            locSizes{actIdx}(i,j) = get_optimal_locality(sys, params);
         end
     end
 end

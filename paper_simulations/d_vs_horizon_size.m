@@ -57,7 +57,7 @@ for actIdx=1:numActDens
         fprintf('Simulating horizon size %d of %d\n', i, numHorizonSizes);
         for j=1:numSimsPerPt
             fprintf('\tSim %d of %d\n', j, numSimsPerPt);     
-            locSizes{actIdx}(i,j) = get_ideal_locality(systems{actIdx,j}, params);
+            locSizes{actIdx}(i,j) = get_optimal_locality(systems{actIdx,j}, params);
         end
     end
 end

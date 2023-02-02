@@ -17,13 +17,13 @@ sys.Nx = Nx; sys.Nu = Nu;
 params       = MPCParams();
 params.tFIR_ = T+1; % Code and paper use different conventions
 
-locality = get_ideal_locality(sys, params)
+locality = get_optimal_locality(sys, params)
 
 %% Looking at individual matrices
 eps = 1e-8; % zero-trimming
 
-ZAB  = get_constraint_zab(sys, T);
-IO   = [eye(Nx); zeros(Nx*(T-1), Nx)];
+ZAB  = get_constraint_zab(sys, T+1);
+IO   = [eye(Nx); zeros(Nx*(T), Nx)];
 ZABp = pinv(ZAB);
 
 a = ZABp*IO;
@@ -41,13 +41,14 @@ F = Zhblk([3, 5, 11, 14],:);
 
 X = [eye(8), eye(8), eye(8)];
 
-Zh*X*(eye(size(F,2)) - pinv(F)*F);
+dynamicsFirst = Zh*X*(eye(size(F,2)) - pinv(F)*F)
 
 x0 = ones(Nx,1);
 
-% Similar nonzeros whether we use pinv(H)*H or H\H
-% Remember to edit get_local_subspace.m to see full untrimmed matrix
 params.locality_ = 2;
 G = get_local_subspace(sys, x0, params, eps);
-full(G)
+
+% See instructions in get_local_subspace.m to see full untrimmed matrix
+
+localityFirst = full(G)
 

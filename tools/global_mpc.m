@@ -2,6 +2,10 @@ function [xs, us] = global_mpc(sys, x0, params, tHorizon)
 % params   : MPCParams() object containing horizon, objective, constraints
 %            note: terminal cost/constr not accounted for in this case
 % tHorizon : how long to run MPC for
+% 
+% This function runs global MPC (i.e. with no locality constraints). The
+% standard open-loop formulation (i.e. no closed-loop maps) is used to
+% conserve RAM space
 
 params.sanity_check_cent();
 

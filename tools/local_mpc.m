@@ -2,8 +2,9 @@ function [xs, us] = local_mpc(sys, x0, params, tHorizon)
 % params   : MPCParams() object containing horizon, objective, constraints
 %            note: terminal cost/constr not accounted for in this case
 % tHorizon : how long to run MPC for
-% Adapted from mpc_centralized; specialized for nominal only
-% on a computer with no GPU (i.e. mine), this is the fastest way to do this
+% 
+% Adapted from mpc_centralized, specialized for fast, nominal only
+% computation for computers with no GPU
 
 params.sanity_check_cent();
 

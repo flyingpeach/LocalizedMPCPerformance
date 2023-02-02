@@ -37,9 +37,12 @@ for i=1:Nx
         return;
     end
     
-    % IHHi     = speye(nCols) - pinv(full(Hi))*Hi; % For curiosity
     IHHi     = speye(nCols) - Hi\Hi;
-    
+
+    % Equivalent to above, but slower
+    % Uncomment this out for numerical_example.m
+    % IHHi     = speye(nCols) - pinv(full(Hi))*Hi; 
+
     if(any(isnan(IHHi(:)))) % Conditioning poor, no solution available
         mtx = 0;
         parTimes(i) = toc;
@@ -53,7 +56,9 @@ for i=1:Nx
             zeroCols(j) = true;
         end
     end
-    IHHi(:,zeroCols) = []; % Comment this out when we want full matrix
+    
+    % Comment this out for numerical_example.m (for full matrix)
+    IHHi(:,zeroCols) = []; 
     
     xi  = x0(i)*speye(nPhi); 
     mtx = [mtx xi(Nx+1:end,myIdx)*IHHi];

@@ -49,7 +49,7 @@ for i=1:numHorizonSizes
     fprintf('Simulating horizon size %d of %d\n', i, numHorizonSizes);
     for j=1:numSimsPerPt
         fprintf('\tSim %d of %d\n', j, numSimsPerPt)
-        [locSizes(i,j), parTimes(i,j), rankTimes(i,j)] = get_ideal_locality(systems{j}, params);
+        [locSizes(i,j), parTimes(i,j), rankTimes(i,j)] = get_optimal_locality(systems{j}, params);
     end
 end
 
