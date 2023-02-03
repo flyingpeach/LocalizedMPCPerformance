@@ -2,7 +2,7 @@ clear all; clc;
 warning off;
 
 %% Search for rank deficiency
-numSims = 1000;
+numSims = 2000;
 
 gridSizeMin = 4;
 gridSizeMax = 11;
@@ -13,11 +13,11 @@ actDensMax = 1.0;
 specRadMin = 0.5;
 specRadMax = 2.5;
 
-horizonMin = 3;  % Corresponds to T in paper
+horizonMin = 1;  % Corresponds to T in paper
 horizonMax = 20;
 
 Ts = 0.2;
-rng(2022);
+rng(2023);
 
 %% Generate plants
 seeds     = randi([1, numSims*10], 1, numSims); % For plant generation
@@ -25,6 +25,7 @@ gridSizes = randi([gridSizeMin, gridSizeMax], 1, numSims);
 actDens   = rand(1, numSims) * (actDensMax-actDensMin) + actDensMin;
 systems   = cell(numSims);
 
+skipSims = []; % Skip unconnected systems
 for j=1:numSims
     seed     = seeds(j);
     gridSize = gridSizes(j);
@@ -37,12 +38,23 @@ for j=1:numSims
     end
 
     [adjMtx, nodeCoords, susceptMtx, inertiasInv, dampings] = generate_grid_topology(gridSize, connectThresh, seed);
+        
     actuatedNodes = randsample(numNodes, numActs);
     systems{j}    = generate_grid_plant(actuatedNodes, adjMtx, susceptMtx, inertiasInv, dampings, Ts);
 
     % Use custom communication structure for grid
     systems{j}.AComm = adjust_grid_sys_locality(systems{j}.A);
+    
+    connected = check_connected(systems{j});
+    if ~connected
+        %figure(j) % Uncomment to double-check
+        %plot_graph(adjMtx, nodeCoords, 'k');
+        skipSims = [skipSims j];
+    end
 end
+
+trueSims    = setdiff(1:numSims, skipSims);
+trueNumSims = length(trueSims);
 
 %% Simulations
 specRads  = rand(1, numSims) * (specRadMax-specRadMin) + specRadMin;
@@ -50,8 +62,9 @@ horizons  = randi([horizonMin, horizonMax], 1, numSims);
 locSizes  = zeros(1, numSims);
 rankDefs  = false(1, numSims);
 
-for j=1:numSims
-    fprintf('Simulation %d of %d\n', j, numSims);
+for i=1:trueNumSims
+    j = trueSims(i);
+    fprintf('Simulation %d of %d\n', i, trueNumSims);
 
     params = MPCParams();
     params.tFIR_ = horizons(j) + 1; % Code and paper use different conventions
