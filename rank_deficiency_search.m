@@ -60,12 +60,7 @@ for j=1:numSims
     specRadOriginal = max(abs(eig(sys.A)));
     sys.A           = sys.A / specRadOriginal * specRads(j);
     
-    % Scale tolerance with system/horizon size (effective size)
-    % Will range from 1e-8 to 1e-5
-    effSize = sys.Nx*(horizons(j)) + sys.Nu*(horizons(j)-1);        
-    eps = 10^(2*log10(effSize) - 12);
-    
-    [locSizes(j), ~, ~, rankDefs(j)] = get_optimal_locality(sys, params, eps);
+    [locSizes(j), ~, ~, rankDefs(j)] = get_optimal_locality(sys, params);
     
     if rankDefs(j)
         fprintf('==Rank deficiency found at sim %d\n==', j);
