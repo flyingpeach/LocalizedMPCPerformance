@@ -2,7 +2,7 @@ clear all; clc;
 warning off;
 
 %% Search for rank deficiency
-numSims = 1000;
+numSims = 200;
 
 gridSizeMin = 4;
 gridSizeMax = 11;
@@ -17,7 +17,7 @@ horizonMin = 3;  % Corresponds to T in paper
 horizonMax = 20;
 
 Ts = 0.2;
-rng(2022);
+rng(420);
 
 %% Generate plants
 seeds     = randi([1, numSims*10], 1, numSims); % For plant generation
