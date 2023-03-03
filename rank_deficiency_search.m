@@ -16,8 +16,9 @@ specRadMax = 2.5;
 horizonMin = 3;  % Corresponds to T in paper
 horizonMax = 20;
 
-Ts = 0.2;
-rng(420);
+Ts   = 0.2;
+seed = 4200
+rng(seed);
 
 %% Generate plants
 seeds     = randi([1, numSims*10], 1, numSims); % For plant generation
