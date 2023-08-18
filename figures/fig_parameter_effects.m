@@ -14,7 +14,19 @@ fontsizeAxis   = 12;
 fontsizeTitle  = 14;
 
 LineWidth  = 4;
-MarkerSize = LineWidth*8;
+
+MarkerSize0 = LineWidth*2;
+MarkerSize1 = LineWidth*2;
+MarkerSize2 = LineWidth*3.5;
+MarkerSize3 = LineWidth*1.25;
+
+Marker0 = 'o-';
+Marker1 = 'square-';
+Marker2 = 'x-';
+Marker3 = '<-';
+
+Marker = {Marker1, Marker2, Marker3};
+MarkerSize = {MarkerSize1, MarkerSize2, MarkerSize3};
 
 figure(2);
 
@@ -24,8 +36,8 @@ actMeans = mean(locSizes,2)' - 1;
 actStds  = std(locSizes, 0, 2)';
 color    = [0 0 0];
 subplot(1,3,1); box on; hold on;
-plot(actDensities, actMeans, '.-', 'LineWidth', LineWidth, ... 
-    'MarkerSize', MarkerSize, 'Color', color, ...
+plot(actDensities, actMeans, Marker0, 'LineWidth', LineWidth, ... 
+    'MarkerSize', MarkerSize0, 'Color', color, ...
     'MarkerEdge', color, 'MarkerFaceColor', color);
 
 color    = [0 0 0];
@@ -55,8 +67,8 @@ subplot(1,3,2); box on; hold on;
 
 for actIdx=numActDens:-1:1
     color = colors{actIdx};
-    plot(gridSizes.^2, netMeans{actIdx}, '.-', 'LineWidth', LineWidth, ... 
-        'MarkerSize', MarkerSize, 'Color', color, ...
+    plot(gridSizes.^2, netMeans{actIdx}, Marker{actIdx}, 'LineWidth', LineWidth, ... 
+        'MarkerSize', MarkerSize{actIdx}, 'Color', color, ...
         'MarkerEdge', color, 'MarkerFaceColor', color);
 end
 
@@ -87,8 +99,8 @@ subplot(1,3,3); box on; hold on;
 
 for actIdx=numActDens:-1:1
     color = colors{actIdx};
-    plot(Ts, horMeans{actIdx}, '.-', 'LineWidth', LineWidth, ... 
-        'MarkerSize', MarkerSize, 'Color', color, ...
+    plot(Ts, horMeans{actIdx}, Marker{actIdx}, 'LineWidth', LineWidth, ... 
+        'MarkerSize', MarkerSize{actIdx}, 'Color', color, ...
         'MarkerEdge', color, 'MarkerFaceColor', color);
 end
 
